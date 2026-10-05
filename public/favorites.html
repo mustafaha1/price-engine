@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta name="theme-color" content="#22c55e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PriceEngine">
+  <title>Favorites - PriceEngine</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+    .navbar { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 16px 0; }
+    .navbar .container { display: flex; align-items: center; justify-content: space-between; }
+    .logo { font-size: 1.5rem; font-weight: 800; color: #22c55e; text-decoration: none; }
+    .logo i { margin-right: 8px; }
+    .nav-links a { text-decoration: none; color: #64748b; font-weight: 500; margin-left: 20px; }
+    .nav-links a:hover { color: #22c55e; }
+    .hero { padding: 40px 0; text-align: center; }
+    .hero h1 { font-size: 2rem; font-weight: 800; }
+    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 24px; padding: 20px 0 60px; }
+    .product-card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .product-card img { width: 100%; height: 200px; object-fit: cover; }
+    .product-card .content { padding: 16px; }
+    .product-card .source { font-size: 0.75rem; color: #22c55e; font-weight: 600; text-transform: uppercase; }
+    .product-card h4 { font-size: 0.95rem; font-weight: 600; margin: 4px 0 8px; height: 2.6em; overflow: hidden; }
+    .product-card .price { font-size: 1.3rem; font-weight: 800; color: #0f172a; }
+    .product-card .actions { display: flex; gap: 8px; margin-top: 12px; }
+    .btn { padding: 10px 16px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; font-size: 0.85rem; }
+    .btn-primary { background: #22c55e; color: white; }
+    .btn-danger { background: #ef4444; color: white; }
+    .empty { text-align: center; padding: 60px 20px; color: #64748b; }
+    .empty i { font-size: 4rem; margin-bottom: 20px; color: #cbd5e1; }
+    .footer { background: #0f172a; color: #94a3b8; padding: 40px 0; text-align: center; margin-top: 40px; }
+    .footer a { color: #22c55e; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="/" class="logo"><i class="fas fa-search-dollar"></i>PriceEngine</a>
+      <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/deals.html">Deals</a>
+        <a href="/alerts.html">Alerts</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <div class="container">
+      <h1>Your Favorites</h1>
+    </div>
+  </div>
+
+  <div class="container">
+    <div id="favoritesGrid" class="products-grid">
+      <div class="empty">
+        <i class="fas fa-heart"></i>
+        <h3>No favorites yet</h3>
+        <p>Search for products and click the heart icon to save them here.</p>
+        <a href="/" class="btn btn-primary" style="margin-top:16px;">Start Searching</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="container"><p>&copy; 2025 Global Price Comparison Engine</p></div>
+  </div>
+
+  <script>
+    const API_BASE = '';
+    function getToken() { return localStorage.getItem('token'); }
+
+    async function loadFavorites() {
+      const token = getToken();
+      if (!token) { window.location.href = '/login.html'; return; }
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/favorites`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        const grid = document.getElementById('favoritesGrid');
+        if (data.favorites && data.favorites.length > 0) {
+          grid.innerHTML = data.favorites.map(p => `
+            <div class="product-card">
+              <img src="${p.image_url || 'https://via.placeholder.com/300x300/cbd5e1/64748b?text=No+Image'}" alt="${p.title}">
+              <div class="content">
+                <div class="source">${p.source}</div>
+                <h4>${p.title}</h4>
+                <div class="price">$${p.price?.toFixed(2) || '0.00'}</div>
+                <div class="actions">
+                  <a href="${p.product_url}" target="_blank" class="btn btn-primary">Buy Now</a>
+                </div>
+              </div>
+            </div>
+          `).join('');
+        }
+      } catch (e) {}
+    }
+
+    loadFavorites();
+  </script>
+</body>
+</html>

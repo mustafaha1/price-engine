@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta name="theme-color" content="#22c55e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PriceEngine">
+  <title>Hot Deals - PriceEngine</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+    .navbar { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 16px 0; }
+    .navbar .container { display: flex; align-items: center; justify-content: space-between; }
+    .logo { font-size: 1.5rem; font-weight: 800; color: #22c55e; text-decoration: none; }
+    .logo i { margin-right: 8px; }
+    .nav-links a { text-decoration: none; color: #64748b; font-weight: 500; margin-left: 20px; }
+    .nav-links a:hover { color: #22c55e; }
+    .hero { padding: 40px 0; text-align: center; }
+    .hero h1 { font-size: 2rem; font-weight: 800; }
+    .hero p { color: #64748b; margin-top: 8px; }
+    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 24px; padding: 20px 0 60px; }
+    .product-card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: transform 0.2s; }
+    .product-card:hover { transform: translateY(-4px); }
+    .product-card img { width: 100%; height: 200px; object-fit: cover; }
+    .product-card .content { padding: 16px; }
+    .product-card .source { font-size: 0.75rem; color: #22c55e; font-weight: 600; text-transform: uppercase; }
+    .product-card h4 { font-size: 0.95rem; font-weight: 600; margin: 4px 0 8px; height: 2.6em; overflow: hidden; }
+    .product-card .price { font-size: 1.3rem; font-weight: 800; color: #0f172a; }
+    .product-card .price .original { font-size: 0.85rem; color: #94a3b8; text-decoration: line-through; margin-left: 8px; }
+    .product-card .savings { font-size: 0.8rem; color: #ef4444; font-weight: 700; margin-top: 4px; }
+    .product-card .actions { display: flex; gap: 8px; margin-top: 12px; }
+    .btn { padding: 10px 16px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; font-size: 0.85rem; flex: 1; text-align: center; }
+    .btn-primary { background: #22c55e; color: white; }
+    .btn-primary:hover { background: #16a34a; }
+    .footer { background: #0f172a; color: #94a3b8; padding: 40px 0; text-align: center; margin-top: 40px; }
+    .footer a { color: #22c55e; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="/" class="logo"><i class="fas fa-search-dollar"></i>PriceEngine</a>
+      <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/premium.html">Premium</a>
+        <a href="/alerts.html">Alerts</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <div class="container">
+      <h1>Hot Deals</h1>
+      <p>Best discounts from around the web</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div id="dealsGrid" class="products-grid"></div>
+  </div>
+
+  <div class="footer">
+    <div class="container"><p>&copy; 2025 Global Price Comparison Engine</p></div>
+  </div>
+
+  <script>
+    const API_BASE = '';
+    async function loadDeals() {
+      try {
+        const res = await fetch(`${API_BASE}/api/deals`);
+        const data = await res.json();
+        const grid = document.getElementById('dealsGrid');
+        if (data.deals) {
+          grid.innerHTML = data.deals.map(d => `
+            <div class="product-card">
+              <img src="${d.image_url}" alt="${d.title}">
+              <div class="content">
+                <div class="source">${d.source}</div>
+                <h4>${d.title}</h4>
+                <div class="price">$${d.price.toFixed(2)} <span class="original">$${d.original_price.toFixed(2)}</span></div>
+                <div class="savings">-${d.discount_percent}% OFF</div>
+                <div class="actions">
+                  <a href="${d.product_url}" class="btn btn-primary">View Deal</a>
+                </div>
+              </div>
+            </div>
+          `).join('');
+        }
+      } catch (e) { console.error('Failed to load deals', e); }
+    }
+    loadDeals();
+  </script>
+</body>
+</html>
