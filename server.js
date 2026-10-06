@@ -28,18 +28,20 @@ const authLimiter = rateLimit({
 });
 
 app.use(helmet({
-  contentSecurityPolicy: {
+contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
       scriptSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrcAttr: ["'unsafe-inline'"],
       imgSrc: ["'self'", "https:", "data:", "blob:", "/uploads"],
       connectSrc: ["'self'"],
       frameAncestors: ["'none'"],
       upgradeInsecureRequests: [],
     }
   },
+
   crossOriginEmbedderPolicy: false,
   hsts: { maxAge: 31536000, includeSubDomains: true, preload: true }
 }));
