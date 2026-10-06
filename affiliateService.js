@@ -1,5 +1,5 @@
 const AFFILIATE_PROGRAMS = {
-  'amazon.com': { tag: '?tag=priceeengine08-20 ' },
+  'amazon.com': { tag: '?tag=priceeengine08-20' },
   'amazon.co.uk': { tag: '?tag=priceeengine08-20' },
   'amazon.ca': { tag: '?tag=priceeengine08-20' },
   'amazon.de': { tag: '?tag=priceeengine08-20' },
