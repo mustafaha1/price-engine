@@ -10,10 +10,8 @@ const { initDatabase } = require('./database');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Trust proxy for Railway
 app.set('trust proxy', 1);
 
-// Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -23,14 +21,12 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Stricter rate limit for auth endpoints
 const authLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 10,
   message: { success: false, message: 'Too many auth attempts, please try again later.' }
 });
 
-// Security headers with Helmet
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -52,7 +48,6 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Input sanitization middleware
 function sanitizeInput(req, res, next) {
   if (req.body && typeof req.body === 'object') sanitizeObject(req.body);
   if (req.query && typeof req.query === 'object') sanitizeObject(req.query);
@@ -69,28 +64,23 @@ function sanitizeObject(obj) {
 
 app.use(sanitizeInput);
 
-// Static files
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(__dirname));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', database: 'SQLite', timestamp: new Date().toISOString() });
 });
 
-// Routes
-app.use('/api/auth', authLimiter, require('./routes/auth'));
-app.use('/api/search', require('./routes/search'));
-app.use('/api/favorites', require('./routes/favorites'));
-app.use('/api/upload', require('./routes/upload'));
+app.use('/api/auth', authLimiter, require('./auth'));
+app.use('/api/search', require('./search'));
+app.use('/api/favorites', require('./favorites'));
+app.use('/api/upload', require('./upload'));
 
-// Error handling
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ success: false, message: 'Something went wrong!' });
 });
 
-// Initialize database and start server
 initDatabase()
   .then(() => {
     app.listen(PORT, () => {
