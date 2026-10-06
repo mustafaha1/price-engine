@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { getDb } = require('../database');
+const { getDb } = require('./database');
 const router = express.Router();
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -9,7 +9,6 @@ if (!JWT_SECRET) {
   console.error('WARNING: JWT_SECRET not set!');
 }
 
-// Register
 router.post('/register', (req, res) => {
   try {
     var name = req.body.name;
@@ -83,7 +82,6 @@ router.post('/register', (req, res) => {
   }
 });
 
-// Login
 router.post('/login', (req, res) => {
   try {
     var email = req.body.email;
@@ -137,7 +135,6 @@ router.post('/login', (req, res) => {
   }
 });
 
-// Get current user
 router.get('/me', authenticateToken, (req, res) => {
   var db = getDb();
   if (!db) {
@@ -152,7 +149,6 @@ router.get('/me', authenticateToken, (req, res) => {
   });
 });
 
-// Middleware: verify JWT
 function authenticateToken(req, res, next) {
   var authHeader = req.headers['authorization'];
   var token = authHeader && authHeader.split(' ')[1];
