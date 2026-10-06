@@ -1,7 +1,7 @@
 const express = require('express');
 const { getDb } = require('./database');
 const { authenticateToken } = require('./auth');
-const searchService = require('../services/searchService');
+const searchService = require('./searchService');
 const router = express.Router();
 
 // Search products
