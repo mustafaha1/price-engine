@@ -1,35 +1,36 @@
-require('dotenv').config();
 const express = require('express');
-const cors = require('cors');
 const helmet = require('helmet');
-const compression = require('compression');
-const morgan = require('morgan');
-const cookieParser = require('cookie-parser');
-const rateLimit = require('express-rate-limit');
+const cors = require('cors');
 const path = require('path');
+require('dotenv').config();
 
-const { connectDatabase } = require('./models/database');
-const { errorHandler } = require('./middleware/errorHandler');
-const { sanitizeInput } = require('./middleware/sanitize');
-const cronJobs = require('./utils/cronJobs');
-
-const searchRoutes = require('./routes/search');
-const compareRoutes = require('./routes/compare');
-const categoriesRoutes = require('./routes/categories');
-const productsRoutes = require('./routes/products');
-const authRoutes = require('./routes/auth');
-const premiumRoutes = require('./routes/premium');
-const alertsRoutes = require('./routes/alerts');
-const apiRoutes = require('./routes/api');
-const dealsRoutes = require('./routes/deals');
-const imageSearchRoutes = require('./routes/imageSearch');
-const healthRoutes = require('./routes/health');
+const rateLimit = require('express-rate-limit');
+const { initDatabase } = require('./database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const isDev = process.env.NODE_ENV !== 'production';
 
-// Security: Helmet with safe CSP for our frontend
+// Trust proxy for Railway
+app.set('trust proxy', 1);
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many requests, please try again later.' }
+});
+app.use(limiter);
+
+// Stricter rate limit for auth endpoints
+const authLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  message: { success: false, message: 'Too many auth attempts, please try again later.' }
+});
+
+// Security headers with Helmet
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -37,101 +38,66 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
       scriptSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "https:", "data:", "blob:"],
+      imgSrc: ["'self'", "https:", "data:", "blob:", "/uploads"],
       connectSrc: ["'self'"],
       frameAncestors: ["'none'"],
       upgradeInsecureRequests: [],
     }
   },
   crossOriginEmbedderPolicy: false,
-  hsts: {
-    maxAge: 31536000,
-    includeSubDomains: true,
-    preload: true
-  }
+  hsts: { maxAge: 31536000, includeSubDomains: true, preload: true }
 }));
 
-// Security: CORS - allow same-origin only in production
-if (isDev) {
-  app.use(cors({ origin: true, credentials: true }));
-} else {
-  app.use(cors({ origin: false })); // Production: same-origin only
+app.use(cors());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+// Input sanitization middleware
+function sanitizeInput(req, res, next) {
+  if (req.body && typeof req.body === 'object') sanitizeObject(req.body);
+  if (req.query && typeof req.query === 'object') sanitizeObject(req.query);
+  next();
 }
 
-app.use(compression());
-app.use(cookieParser());
-app.use(express.json({ limit: '1mb' }));
-app.use(express.urlencoded({ extended: true, limit: '1mb' }));
-app.use(morgan(isDev ? 'dev' : 'combined'));
+function sanitizeObject(obj) {
+  for (var key in obj) {
+    if (typeof obj[key] === 'string') {
+      obj[key] = obj[key].replace(/[<>]/g, '').trim().substring(0, 500);
+    }
+  }
+}
 
-// Security: Rate limiting
-const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Too many requests, please try again later.' }
-});
-app.use('/api/', limiter);
-
-// Security: Stricter rate limit for auth
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
-  message: { error: 'Too many login attempts, please try again later.' }
-});
-app.use('/api/auth/login', authLimiter);
-app.use('/api/auth/register', authLimiter);
-
-// Security: Hide powered-by header
-app.disable('x-powered-by');
-
-// Security: Sanitize all inputs
 app.use(sanitizeInput);
 
 // Static files
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// API routes
-app.use('/api/search', searchRoutes);
-app.use('/api/compare', compareRoutes);
-app.use('/api/categories', categoriesRoutes);
-app.use('/api/products', productsRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/premium', premiumRoutes);
-app.use('/api/alerts', alertsRoutes);
-app.use('/api/v1', apiRoutes);
-app.use('/api/deals', dealsRoutes);
-app.use('/api/image-search', imageSearchRoutes);
-app.use('/api/health', healthRoutes);
-
-// SPA fallback
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'OK', database: 'SQLite', timestamp: new Date().toISOString() });
 });
 
-app.use(errorHandler);
+// Routes
+app.use('/api/auth', authLimiter, require('./routes/auth'));
+app.use('/api/search', require('./routes/search'));
+app.use('/api/favorites', require('./routes/favorites'));
+app.use('/api/upload', require('./routes/upload'));
 
-async function start() {
-  try {
-    await connectDatabase();
-    cronJobs.start();
+// Error handling
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ success: false, message: 'Something went wrong!' });
+});
+
+// Initialize database and start server
+initDatabase()
+  .then(() => {
     app.listen(PORT, () => {
-      console.log('\n========================================');
-      console.log('  Global Price Comparison Engine v2.0');
-      console.log('  Mode:', isDev ? 'DEVELOPMENT' : 'PRODUCTION');
-      console.log('========================================');
-      console.log('  Server: http://localhost:' + PORT);
-      console.log('  Health: http://localhost:' + PORT + '/api/health');
-      console.log('========================================\n');
+      console.log('Server running on port ' + PORT);
     });
-  } catch (err) {
-    console.error('Failed to start server:', err);
+  })
+  .catch(err => {
+    console.error('Failed to initialize database:', err);
     process.exit(1);
-  }
-}
-
-start();
+  });
