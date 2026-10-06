@@ -10,7 +10,6 @@
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #f2f2f7; color: #1c1c1e; min-height: 100vh; }
 
-    /* === STICKY TOP NAV === */
     .top-nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
       background: #fff; border-bottom: 1px solid #e5e5ea;
@@ -24,7 +23,6 @@
     .nav-links .btn-nav { background: #22c55e; color: #fff; padding: 8px 18px; border-radius: 20px; font-weight: 600; }
     .hamburger { display: none; background: none; border: none; font-size: 1.4rem; color: #1c1c1e; cursor: pointer; padding: 4px; }
 
-    /* Mobile Menu */
     .mobile-menu {
       display: none; position: fixed; top: 56px; left: 0; right: 0;
       background: #fff; border-bottom: 1px solid #e5e5ea; padding: 16px; z-index: 999;
@@ -37,7 +35,6 @@
     .overlay { display: none; position: fixed; top: 56px; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.3); z-index: 997; }
     .overlay.open { display: block; }
 
-    /* === STICKY SEARCH BAR === */
     .search-sticky {
       position: fixed; top: 56px; left: 0; right: 0; z-index: 998;
       background: #f2f2f7; padding: 12px 16px; border-bottom: 1px solid #e5e5ea;
@@ -64,27 +61,19 @@
     }
     .search-box button.search-btn:hover { background: #16a34a; }
 
-    /* Image Preview Area */
     .image-preview-area {
       display: none; margin-top: 12px; background: #fff;
       border-radius: 14px; border: 1px solid #e5e5ea; padding: 12px;
       align-items: center; gap: 12px;
     }
     .image-preview-area.show { display: flex; }
-    .image-preview-area img {
-      width: 60px; height: 60px; object-fit: cover; border-radius: 10px;
-    }
-    .image-preview-area .preview-text {
-      flex: 1; font-size: 0.9rem; color: #3a3a3c;
-    }
-    .image-preview-area .preview-text small {
-      display: block; color: #8e8e93; font-size: 0.8rem; margin-top: 2px;
-    }
+    .image-preview-area img { width: 60px; height: 60px; object-fit: cover; border-radius: 10px; }
+    .image-preview-area .preview-text { flex: 1; font-size: 0.9rem; color: #3a3a3c; }
+    .image-preview-area .preview-text small { display: block; color: #8e8e93; font-size: 0.8rem; margin-top: 2px; }
     .btn-remove-img {
       padding: 8px 14px; background: #f2f2f7; color: #ff3b30; border: none;
       border-radius: 10px; font-size: 0.85rem; cursor: pointer; font-weight: 500;
     }
-    .btn-remove-img:hover { background: #ffe5e5; }
 
     .filter-bar {
       display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; -webkit-overflow-scrolling: touch;
@@ -95,16 +84,13 @@
       background: #fff; color: #1c1c1e; font-size: 0.85rem; outline: none; white-space: nowrap;
     }
 
-    /* === MAIN CONTENT === */
     .main-content { padding: 170px 12px 40px; max-width: 800px; margin: 0 auto; }
 
-    /* Hero */
     .hero { text-align: center; padding: 30px 20px 20px; }
     .hero h1 { font-size: 2rem; font-weight: 800; color: #1c1c1e; margin-bottom: 8px; }
     .hero h1 span { color: #22c55e; }
     .hero p { color: #8e8e93; font-size: 1rem; }
 
-    /* Stats */
     .stats-grid {
       display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
       max-width: 600px; margin: 0 auto 20px;
@@ -114,11 +100,9 @@
     .stat-card .stat-num { font-size: 1.2rem; font-weight: 800; color: #1c1c1e; }
     .stat-card .stat-label { font-size: 0.75rem; color: #8e8e93; }
 
-    /* Results */
     .results-stats { text-align: center; margin-bottom: 16px; color: #8e8e93; font-size: 0.9rem; }
     .results-list { display: flex; flex-direction: column; gap: 16px; }
 
-    /* Product Card - matching user's current design */
     .product-card {
       background: #fff; border-radius: 20px; overflow: hidden;
       border: 1px solid #e5e5ea;
@@ -173,7 +157,6 @@
   </style>
 </head>
 <body>
-  <!-- Sticky Top Nav -->
   <nav class="top-nav">
     <a href="index.html" class="logo"><i class="fas fa-search-dollar"></i> PriceEngine</a>
     <div class="nav-links" id="desktopNav">
@@ -184,21 +167,19 @@
     <button class="hamburger" id="hamburger" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
   </nav>
 
-  <!-- Mobile Menu -->
   <div class="mobile-menu" id="mobileMenu">
     <a href="index.html"><i class="fas fa-home"></i> Home</a>
     <a href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a>
     <a href="register.html" class="btn-menu"><i class="fas fa-user-plus"></i> Register</a>
     <div style="border-top:1px solid #e5e5ea;margin:8px 0"></div>
-    <a href="#" onclick="showFavorites(); return false;"><i class="fas fa-heart"></i> My Favorites</a>
-    <a href="#" onclick="showDeals(); return false;"><i class="fas fa-fire"></i> Hot Deals</a>
+    <a href="#" onclick="showFavorites();return false;"><i class="fas fa-heart"></i> My Favorites</a>
+    <a href="#" onclick="showDeals();return false;"><i class="fas fa-fire"></i> Hot Deals</a>
   </div>
   <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
-  <!-- Sticky Search -->
   <div class="search-sticky" id="searchSticky">
     <div class="search-box">
-      <input type="text" id="searchInput" placeholder="Search products (e.g., women dress, iPhone...)" onkeypress="if(event.key==='Enter')doSearch()">
+      <input type="text" id="searchInput" placeholder="Search products (e.g., women dress, iPhone...)" onkeydown="if(event.key==='Enter')doSearch()">
       <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleImageSelect(this)">
       <button class="btn-camera" onclick="document.getElementById('cameraInput').click()" title="Take photo or upload image"><i class="fas fa-camera"></i></button>
       <button class="search-btn" onclick="doSearch()"><i class="fas fa-search"></i> <span>Search</span></button>
@@ -236,7 +217,6 @@
     </div>
   </div>
 
-  <!-- Main Content -->
   <div class="main-content">
     <div class="hero" id="heroSection">
       <h1>Find the <span>Cheapest Price</span> Everywhere</h1>
@@ -258,24 +238,21 @@
     var NO_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2YyZjJmNyIvPjx0ZXh0IHg9IjE1MCIgeT0iMTUwIiBmb250LWZhbWlseT0iQXJpYWwsc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzhlOGU5MyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
 
     function toggleMenu() {
-      var menu = document.getElementById('mobileMenu');
-      var overlay = document.getElementById('overlay');
-      menu.classList.toggle('open');
-      overlay.classList.toggle('open');
+      document.getElementById('mobileMenu').classList.toggle('open');
+      document.getElementById('overlay').classList.toggle('open');
     }
 
     window.addEventListener('scroll', function() {
       var sticky = document.getElementById('searchSticky');
-      if (window.scrollY > 5) { sticky.classList.add('scrolled'); }
-      else { sticky.classList.remove('scrolled'); }
+      if (window.scrollY > 5) sticky.classList.add('scrolled');
+      else sticky.classList.remove('scrolled');
     });
 
-    // Auth
     var token = localStorage.getItem('token');
     if (token) {
       fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + token } })
-        .then(r => r.json())
-        .then(data => {
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
           if (data.success) {
             document.getElementById('desktopNav').innerHTML = '<a href="#" onclick="showFavorites();return false;"><i class="fas fa-heart"></i></a> <a href="#" onclick="logout();return false;">Logout</a>';
             var mm = document.getElementById('mobileMenu');
@@ -286,22 +263,18 @@
     function logout() { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.reload(); }
     function showFavorites() { alert('Login required to view saved favorites'); }
     function showDeals() { document.getElementById('searchInput').value = 'deals'; doSearch(); }
-
     function toggleFav(btn, id) {
       btn.classList.toggle('saved');
       var icon = btn.querySelector('i');
-      if (btn.classList.contains('saved')) { icon.className = 'fas fa-heart'; }
-      else { icon.className = 'far fa-heart'; }
+      if (btn.classList.contains('saved')) icon.className = 'fas fa-heart';
+      else icon.className = 'far fa-heart';
     }
 
-    // === CAMERA / IMAGE UPLOAD ===
     var uploadedImageUrl = null;
 
     function handleImageSelect(input) {
       var file = input.files[0];
       if (!file) return;
-
-      // Show preview
       var reader = new FileReader();
       reader.onload = function(e) {
         document.getElementById('previewImg').src = e.target.result;
@@ -310,29 +283,21 @@
       };
       reader.readAsDataURL(file);
 
-      // Upload to server
       var formData = new FormData();
       formData.append('image', file);
-
-      fetch('/api/upload', {
-        method: 'POST',
-        body: formData
-      })
-      .then(r => r.json())
-      .then(data => {
-        if (data.success) {
-          uploadedImageUrl = data.imageUrl;
-          // Try to extract a search term from filename and auto-search
-          var guess = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ').substring(0, 50);
-          if (guess && guess.length > 2) {
-            document.getElementById('searchInput').value = guess;
-            doSearch();
+      fetch('/api/upload', { method: 'POST', body: formData })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.success) {
+            uploadedImageUrl = data.imageUrl;
+            var guess = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ').substring(0, 50);
+            if (guess && guess.length > 2) {
+              document.getElementById('searchInput').value = guess;
+              doSearch();
+            }
           }
-        }
-      })
-      .catch(err => {
-        console.error('Upload failed:', err);
-      });
+        })
+        .catch(function(err) { console.error('Upload failed:', err); });
     }
 
     function removeImage() {
@@ -362,12 +327,12 @@
       if (maxPrice) url += '&maxPrice=' + maxPrice;
 
       fetch(url)
-        .then(r => r.json())
-        .then(data => {
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
           if (!data.success) { resultsDiv.innerHTML = '<div class="error"><i class="fas fa-exclamation-circle"></i><p>' + data.message + '</p></div>'; return; }
           displayResults(data.results, data.count, query);
         })
-        .catch(err => { resultsDiv.innerHTML = '<div class="error"><i class="fas fa-exclamation-circle"></i><p>Search failed. Please try again.</p></div>'; });
+        .catch(function(err) { resultsDiv.innerHTML = '<div class="error"><i class="fas fa-exclamation-circle"></i><p>Search failed. Please try again.</p></div>'; });
     }
 
     function displayResults(products, count, query) {
@@ -379,7 +344,6 @@
         return;
       }
 
-      // Find min price to estimate "original" price for demo savings
       var minP = Infinity;
       for (var i = 0; i < products.length; i++) { if (products[i].price && products[i].price < minP) minP = products[i].price; }
 
@@ -393,29 +357,30 @@
         var priceDisplay = currency + ' ' + price.toFixed(2);
         var originalDisplay = currency + ' ' + originalPrice;
         var saveDisplay = price > 0 ? 'Save ' + currency + ' ' + saveAmount : '';
-        var imgUrl = p.image || NO_IMAGE;
-        var btnClass = 'btn-buy';
-        var btnText = 'Buy Now';
-        var btnHref = 'href="' + (p.product_url || '#') + '" target="_blank" rel="noopener"';
+        var img = p.image || NO_IMAGE;
+        var title = p.title || 'Unknown Product';
+        var source = p.source || 'Unknown Store';
+        var url = p.product_url || '#';
+        var rating = p.rating ? '<span style="color:#ff9500"><i class="fas fa-star"></i> ' + p.rating + '</span>' : '';
+        var reviews = p.reviews ? '<span style="color:#8e8e93">(' + p.reviews + ' reviews)</span>' : '';
 
-        if (!p.product_url || p.product_url === '#') {
-          btnClass = 'btn-buy disabled'; btnText = 'No Link'; btnHref = 'href="#" onclick="return false;"';
-        }
-
-        html += '<div class="product-card">';
-        html += '<div class="product-image-wrap"><img src="' + imgUrl + '" alt="" onerror="this.src=\'' + NO_IMAGE + '\'" loading="lazy"></div>';
-        html += '<div class="product-info">';
-        html += '<div class="product-source">' + (p.source || 'Google Shopping') + '</div>';
-        html += '<div class="product-title">' + (p.title || 'Unknown Product') + '</div>';
-        html += '<div class="price-row">';
-        html += '<span class="price-current">' + priceDisplay + '</span>';
-        if (price > 0) html += '<span class="price-original">' + originalDisplay + '</span>';
-        html += '</div>';
-        if (saveDisplay) html += '<div class="price-save">' + saveDisplay + '</div>';
-        html += '<div class="btn-row">';
-        html += '<a ' + btnHref + ' class="' + btnClass + '">' + btnText + '</a>';
-        html += '<button class="btn-fav" onclick="toggleFav(this,' + i + ')"><i class="far fa-heart"></i></button>';
-        html += '</div></div></div>';
+        html += '<div class="product-card">' +
+          '<div class="product-image-wrap"><img src="' + img + '" alt="' + title + '" onerror="this.src=\'' + NO_IMAGE + '\'"></div>' +
+          '<div class="product-info">' +
+            '<div class="product-source">' + source + '</div>' +
+            '<div class="product-title">' + title + '</div>' +
+            '<div class="price-row">' +
+              '<span class="price-current">' + priceDisplay + '</span>' +
+              '<span class="price-original">' + originalDisplay + '</span>' +
+            '</div>' +
+            '<div class="price-save">' + saveDisplay + '</div>' +
+            '<div style="margin-bottom:12px">' + rating + ' ' + reviews + '</div>' +
+            '<div class="btn-row">' +
+              '<a href="' + url + '" target="_blank" rel="noopener noreferrer" class="btn-buy">Buy Now</a>' +
+              '<button class="btn-fav" onclick="toggleFav(this, \'' + p.id + '\')"><i class="far fa-heart"></i></button>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
       }
       resultsDiv.innerHTML = html;
     }
