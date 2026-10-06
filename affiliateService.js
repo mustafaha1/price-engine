@@ -1,8 +1,8 @@
 const AFFILIATE_PROGRAMS = {
-  'amazon.com': { tag: '?tag=priceengine-20' },
-  'amazon.co.uk': { tag: '?tag=priceengine-21' },
-  'amazon.ca': { tag: '?tag=priceengine0d-20' },
-  'amazon.de': { tag: '?tag=priceengine08-21' },
+  'amazon.com': { tag: '?tag=priceeengine08-20 ' },
+  'amazon.co.uk': { tag: '?tag=priceeengine08-20' },
+  'amazon.ca': { tag: '?tag=priceeengine08-20' },
+  'amazon.de': { tag: '?tag=priceeengine08-20' },
   'ebay.com': { tag: '?campid=5338728001' },
   'walmart.com': { tag: '?affp1=priceengine' },
   'target.com': { tag: '?afid=priceengine' },
