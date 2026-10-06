@@ -1,5 +1,5 @@
 const express = require('express');
-const { getDb } = require('../database');
+const { getDb } = require('./database');
 const { authenticateToken } = require('./auth');
 const searchService = require('../services/searchService');
 const router = express.Router();
