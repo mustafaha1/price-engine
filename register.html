@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Register - PriceEngine</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { font-family: 'Inter', sans-serif; background: #f2f2f7; color: #1c1c1e; min-height: 100vh; }
+    .top-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: #fff; border-bottom: 1px solid #e5e5ea;
+      padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo { display: flex; align-items: center; gap: 8px; font-size: 1.4rem; font-weight: 800; color: #22c55e; text-decoration: none; }
+    .logo i { font-size: 1.5rem; }
+    .nav-links { display: flex; align-items: center; gap: 20px; }
+    .nav-links a { color: #8e8e93; text-decoration: none; font-size: 0.9rem; font-weight: 500; }
+    .nav-links .btn-nav { background: #22c55e; color: #fff; padding: 8px 18px; border-radius: 20px; font-weight: 600; }
+    .hamburger { display: none; background: none; border: none; font-size: 1.4rem; color: #1c1c1e; cursor: pointer; padding: 4px; }
+    .mobile-menu { display: none; position: fixed; top: 56px; left: 0; right: 0; background: #fff; border-bottom: 1px solid #e5e5ea; padding: 16px; z-index: 999; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    .mobile-menu.open { display: block; }
+    .mobile-menu a { display: block; padding: 14px 16px; color: #1c1c1e; text-decoration: none; font-weight: 500; border-radius: 12px; margin-bottom: 6px; }
+    .mobile-menu .btn-menu { background: #22c55e; color: #fff; text-align: center; }
+    .overlay { display: none; position: fixed; top: 56px; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.3); z-index: 997; }
+    .overlay.open { display: block; }
+
+    .auth-container { padding: 100px 20px 40px; max-width: 420px; margin: 0 auto; }
+    .auth-box { background: #fff; border-radius: 24px; padding: 40px 32px; border: 1px solid #e5e5ea; }
+    .auth-box .logo-icon { text-align: center; margin-bottom: 20px; }
+    .auth-box .logo-icon i { font-size: 3rem; color: #22c55e; }
+    .auth-box h2 { font-size: 1.6rem; font-weight: 700; text-align: center; margin-bottom: 8px; }
+    .auth-box p { color: #8e8e93; text-align: center; margin-bottom: 28px; font-size: 0.95rem; }
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; margin-bottom: 8px; font-size: 0.9rem; font-weight: 500; color: #3a3a3c; }
+    .form-group input {
+      width: 100%; padding: 14px 16px; border: 2px solid #e5e5ea; border-radius: 14px;
+      background: #f2f2f7; color: #1c1c1e; font-size: 1rem; outline: none; transition: all 0.2s;
+    }
+    .form-group input:focus { border-color: #22c55e; background: #fff; }
+    .btn-submit {
+      width: 100%; padding: 14px; background: #22c55e; color: #fff; border: none;
+      border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 8px;
+    }
+    .btn-submit:hover { background: #16a34a; }
+    .btn-submit:disabled { background: #c7c7cc; cursor: not-allowed; }
+    .auth-link { text-align: center; margin-top: 24px; color: #8e8e93; font-size: 0.95rem; }
+    .auth-link a { color: #22c55e; text-decoration: none; font-weight: 600; }
+    .error { background: #fff2f2; color: #ff3b30; padding: 14px; border-radius: 12px; margin-bottom: 20px; font-size: 0.9rem; display: none; border: 1px solid #ffd6d6; }
+    .success { background: #f0fdf4; color: #16a34a; padding: 14px; border-radius: 12px; margin-bottom: 20px; font-size: 0.9rem; display: none; border: 1px solid #bbf7d0; }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hamburger { display: block; }
+      .auth-container { padding-top: 90px; }
+      .auth-box { padding: 32px 24px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="index.html" class="logo"><i class="fas fa-search-dollar"></i> PriceEngine</a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="login.html">Login</a>
+      <a href="register.html" class="btn-nav">Register</a>
+    </div>
+    <button class="hamburger" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
+  </nav>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html"><i class="fas fa-home"></i> Home</a>
+    <a href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a>
+    <a href="register.html" class="btn-menu"><i class="fas fa-user-plus"></i> Register</a>
+  </div>
+  <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+  <div class="auth-container">
+    <div class="auth-box">
+      <div class="logo-icon"><i class="fas fa-search-dollar"></i></div>
+      <h2>Create Account</h2>
+      <p>Join PriceEngine and start saving</p>
+      <div class="error" id="errorMsg"></div>
+      <div class="success" id="successMsg"></div>
+      <form id="registerForm">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" placeholder="Enter your name" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="Enter your email" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Min 6 characters" required>
+        </div>
+        <button type="submit" class="btn-submit" id="submitBtn">Register</button>
+      </form>
+      <div class="auth-link">Already have an account? <a href="login.html">Login</a></div>
+    </div>
+  </div>
+
+  <script>
+    function toggleMenu() {
+      document.getElementById('mobileMenu').classList.toggle('open');
+      document.getElementById('overlay').classList.toggle('open');
+    }
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var name = document.getElementById('name').value.trim();
+      var email = document.getElementById('email').value.trim();
+      var password = document.getElementById('password').value;
+      var errorDiv = document.getElementById('errorMsg');
+      var successDiv = document.getElementById('successMsg');
+      var submitBtn = document.getElementById('submitBtn');
+      errorDiv.style.display = 'none'; successDiv.style.display = 'none';
+      if (name.length < 2) { errorDiv.textContent = 'Name must be at least 2 characters'; errorDiv.style.display = 'block'; return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { errorDiv.textContent = 'Invalid email format'; errorDiv.style.display = 'block'; return; }
+      if (password.length < 6) { errorDiv.textContent = 'Password must be at least 6 characters'; errorDiv.style.display = 'block'; return; }
+      submitBtn.disabled = true; submitBtn.textContent = 'Creating account...';
+      fetch('/api/auth/register', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name, email: email, password: password })
+      })
+      .then(r => r.json())
+      .then(data => {
+        submitBtn.disabled = false; submitBtn.textContent = 'Register';
+        if (data.success) {
+          successDiv.textContent = 'Account created! Redirecting...'; successDiv.style.display = 'block';
+          localStorage.setItem('token', data.token); localStorage.setItem('user', JSON.stringify(data.user));
+          setTimeout(function() { window.location.href = 'index.html'; }, 1500);
+        } else { errorDiv.textContent = data.message || 'Registration failed'; errorDiv.style.display = 'block'; }
+      })
+      .catch(err => { submitBtn.disabled = false; submitBtn.textContent = 'Register'; errorDiv.textContent = 'Network error. Please try again.'; errorDiv.style.display = 'block'; });
+    });
+  </script>
+</body>
+</html>

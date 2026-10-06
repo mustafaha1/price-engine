@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PriceEngine</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #f2f2f7; color: #1c1c1e; min-height: 100vh; }
+
+    /* === STICKY TOP NAV === */
+    .top-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: #fff; border-bottom: 1px solid #e5e5ea;
+      padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo { display: flex; align-items: center; gap: 8px; font-size: 1.4rem; font-weight: 800; color: #22c55e; text-decoration: none; }
+    .logo i { font-size: 1.5rem; }
+    .nav-links { display: flex; align-items: center; gap: 20px; }
+    .nav-links a { color: #8e8e93; text-decoration: none; font-size: 0.9rem; font-weight: 500; }
+    .nav-links a:hover { color: #22c55e; }
+    .nav-links .btn-nav { background: #22c55e; color: #fff; padding: 8px 18px; border-radius: 20px; font-weight: 600; }
+    .hamburger { display: none; background: none; border: none; font-size: 1.4rem; color: #1c1c1e; cursor: pointer; padding: 4px; }
+
+    /* Mobile Menu */
+    .mobile-menu {
+      display: none; position: fixed; top: 56px; left: 0; right: 0;
+      background: #fff; border-bottom: 1px solid #e5e5ea; padding: 16px; z-index: 999;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .mobile-menu.open { display: block; }
+    .mobile-menu a { display: block; padding: 14px 16px; color: #1c1c1e; text-decoration: none; font-weight: 500; border-radius: 12px; margin-bottom: 6px; }
+    .mobile-menu a:hover { background: #f2f2f7; color: #22c55e; }
+    .mobile-menu .btn-menu { background: #22c55e; color: #fff; text-align: center; }
+    .overlay { display: none; position: fixed; top: 56px; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.3); z-index: 997; }
+    .overlay.open { display: block; }
+
+    /* === STICKY SEARCH BAR === */
+    .search-sticky {
+      position: fixed; top: 56px; left: 0; right: 0; z-index: 998;
+      background: #f2f2f7; padding: 12px 16px; border-bottom: 1px solid #e5e5ea;
+      transition: box-shadow 0.3s;
+    }
+    .search-sticky.scrolled { box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+    .search-box {
+      display: flex; gap: 0; background: #fff; border-radius: 14px;
+      border: 1px solid #e5e5ea; overflow: hidden; align-items: center;
+    }
+    .search-box input {
+      flex: 1; padding: 14px 16px; border: none; background: transparent;
+      color: #1c1c1e; font-size: 1rem; outline: none;
+    }
+    .search-box input::placeholder { color: #8e8e93; }
+    .btn-camera {
+      padding: 14px 12px; background: transparent; color: #8e8e93; border: none;
+      font-size: 1.2rem; cursor: pointer; display: flex; align-items: center;
+    }
+    .btn-camera:hover { color: #22c55e; }
+    .search-box button.search-btn {
+      padding: 14px 20px; background: #22c55e; color: #fff; border: none;
+      font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;
+    }
+    .search-box button.search-btn:hover { background: #16a34a; }
+
+    /* Image Preview Area */
+    .image-preview-area {
+      display: none; margin-top: 12px; background: #fff;
+      border-radius: 14px; border: 1px solid #e5e5ea; padding: 12px;
+      align-items: center; gap: 12px;
+    }
+    .image-preview-area.show { display: flex; }
+    .image-preview-area img {
+      width: 60px; height: 60px; object-fit: cover; border-radius: 10px;
+    }
+    .image-preview-area .preview-text {
+      flex: 1; font-size: 0.9rem; color: #3a3a3c;
+    }
+    .image-preview-area .preview-text small {
+      display: block; color: #8e8e93; font-size: 0.8rem; margin-top: 2px;
+    }
+    .btn-remove-img {
+      padding: 8px 14px; background: #f2f2f7; color: #ff3b30; border: none;
+      border-radius: 10px; font-size: 0.85rem; cursor: pointer; font-weight: 500;
+    }
+    .btn-remove-img:hover { background: #ffe5e5; }
+
+    .filter-bar {
+      display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; -webkit-overflow-scrolling: touch;
+    }
+    .filter-bar::-webkit-scrollbar { display: none; }
+    .filter-bar select, .filter-bar input {
+      padding: 8px 12px; border: 1px solid #e5e5ea; border-radius: 10px;
+      background: #fff; color: #1c1c1e; font-size: 0.85rem; outline: none; white-space: nowrap;
+    }
+
+    /* === MAIN CONTENT === */
+    .main-content { padding: 170px 12px 40px; max-width: 800px; margin: 0 auto; }
+
+    /* Hero */
+    .hero { text-align: center; padding: 30px 20px 20px; }
+    .hero h1 { font-size: 2rem; font-weight: 800; color: #1c1c1e; margin-bottom: 8px; }
+    .hero h1 span { color: #22c55e; }
+    .hero p { color: #8e8e93; font-size: 1rem; }
+
+    /* Stats */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+      max-width: 600px; margin: 0 auto 20px;
+    }
+    .stat-card { background: #fff; border-radius: 16px; padding: 16px 8px; text-align: center; }
+    .stat-card i { font-size: 1.4rem; color: #22c55e; margin-bottom: 6px; }
+    .stat-card .stat-num { font-size: 1.2rem; font-weight: 800; color: #1c1c1e; }
+    .stat-card .stat-label { font-size: 0.75rem; color: #8e8e93; }
+
+    /* Results */
+    .results-stats { text-align: center; margin-bottom: 16px; color: #8e8e93; font-size: 0.9rem; }
+    .results-list { display: flex; flex-direction: column; gap: 16px; }
+
+    /* Product Card - matching user's current design */
+    .product-card {
+      background: #fff; border-radius: 20px; overflow: hidden;
+      border: 1px solid #e5e5ea;
+    }
+    .product-image-wrap { position: relative; width: 100%; height: 280px; background: #f2f2f7; }
+    .product-image-wrap img { width: 100%; height: 100%; object-fit: cover; }
+    .product-info { padding: 16px; }
+    .product-source {
+      color: #22c55e; font-size: 0.75rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;
+    }
+    .product-title { font-size: 1.05rem; font-weight: 600; color: #1c1c1e; line-height: 1.35; margin-bottom: 10px; }
+    .price-row { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; }
+    .price-current { font-size: 1.5rem; font-weight: 800; color: #1c1c1e; }
+    .price-original { font-size: 1rem; color: #8e8e93; text-decoration: line-through; }
+    .price-save { color: #22c55e; font-size: 0.95rem; font-weight: 600; margin-bottom: 14px; }
+    .btn-row { display: flex; gap: 10px; }
+    .btn-buy {
+      flex: 1; padding: 14px; background: #22c55e; color: #fff; text-align: center;
+      border-radius: 14px; text-decoration: none; font-weight: 700; font-size: 1rem;
+      border: none; cursor: pointer;
+    }
+    .btn-buy:hover { background: #16a34a; }
+    .btn-buy.disabled { background: #c7c7cc; cursor: not-allowed; }
+    .btn-fav {
+      width: 52px; height: 52px; border: 2px solid #22c55e; background: #fff;
+      border-radius: 14px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 1.2rem; color: #22c55e;
+    }
+    .btn-fav:hover { background: #f2f2f7; }
+    .btn-fav.saved { background: #22c55e; color: #fff; }
+
+    .loading, .error, .no-results { text-align: center; padding: 60px 20px; }
+    .loading { color: #8e8e93; }
+    .error { color: #ff3b30; }
+    .no-results { color: #8e8e93; }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hamburger { display: block; }
+      .main-content { padding-top: 160px; }
+      .hero h1 { font-size: 1.6rem; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .product-image-wrap { height: 240px; }
+    }
+    @media (max-width: 480px) {
+      .main-content { padding-top: 155px; }
+      .hero { padding: 20px 16px 10px; }
+      .hero h1 { font-size: 1.4rem; }
+      .product-image-wrap { height: 220px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sticky Top Nav -->
+  <nav class="top-nav">
+    <a href="index.html" class="logo"><i class="fas fa-search-dollar"></i> PriceEngine</a>
+    <div class="nav-links" id="desktopNav">
+      <a href="index.html">Home</a>
+      <a href="login.html">Login</a>
+      <a href="register.html" class="btn-nav">Register</a>
+    </div>
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html"><i class="fas fa-home"></i> Home</a>
+    <a href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a>
+    <a href="register.html" class="btn-menu"><i class="fas fa-user-plus"></i> Register</a>
+    <div style="border-top:1px solid #e5e5ea;margin:8px 0"></div>
+    <a href="#" onclick="showFavorites(); return false;"><i class="fas fa-heart"></i> My Favorites</a>
+    <a href="#" onclick="showDeals(); return false;"><i class="fas fa-fire"></i> Hot Deals</a>
+  </div>
+  <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+  <!-- Sticky Search -->
+  <div class="search-sticky" id="searchSticky">
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Search products (e.g., women dress, iPhone...)" onkeypress="if(event.key==='Enter')doSearch()">
+      <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleImageSelect(this)">
+      <button class="btn-camera" onclick="document.getElementById('cameraInput').click()" title="Take photo or upload image"><i class="fas fa-camera"></i></button>
+      <button class="search-btn" onclick="doSearch()"><i class="fas fa-search"></i> <span>Search</span></button>
+    </div>
+    <div class="image-preview-area" id="imagePreviewArea">
+      <img id="previewImg" src="" alt="">
+      <div class="preview-text">
+        <span id="previewFilename">image.jpg</span>
+        <small>Press Search to find similar products</small>
+      </div>
+      <button class="btn-remove-img" onclick="removeImage()"><i class="fas fa-times"></i> Remove</button>
+    </div>
+    <div class="filter-bar">
+      <select id="sortSelect">
+        <option value="price_asc">Price: Low to High</option>
+        <option value="price_desc">Price: High to Low</option>
+        <option value="rating">Highest Rated</option>
+      </select>
+      <input type="number" id="minPrice" placeholder="Min $">
+      <input type="number" id="maxPrice" placeholder="Max $">
+      <select id="countrySelect">
+        <option value="US">US</option>
+        <option value="UK">UK</option>
+        <option value="CA">CA</option>
+        <option value="AU">AU</option>
+        <option value="DE">DE</option>
+        <option value="FR">FR</option>
+        <option value="IT">IT</option>
+        <option value="ES">ES</option>
+        <option value="NL">NL</option>
+        <option value="BR">BR</option>
+        <option value="IN">IN</option>
+        <option value="JP">JP</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="hero" id="heroSection">
+      <h1>Find the <span>Cheapest Price</span> Everywhere</h1>
+      <p>Compare prices across 40+ global platforms instantly</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card"><i class="fas fa-store"></i><div class="stat-num">40+</div><div class="stat-label">Platforms</div></div>
+      <div class="stat-card"><i class="fas fa-dollar-sign"></i><div class="stat-num">99%</div><div class="stat-label">Accuracy</div></div>
+      <div class="stat-card"><i class="fas fa-bolt"></i><div class="stat-num">Live</div><div class="stat-label">Updates</div></div>
+      <div class="stat-card"><i class="fas fa-globe"></i><div class="stat-num">12</div><div class="stat-label">Countries</div></div>
+    </div>
+
+    <div class="results-stats" id="stats"></div>
+    <div class="results-list" id="results"></div>
+  </div>
+
+  <script>
+    var NO_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2YyZjJmNyIvPjx0ZXh0IHg9IjE1MCIgeT0iMTUwIiBmb250LWZhbWlseT0iQXJpYWwsc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzhlOGU5MyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
+
+    function toggleMenu() {
+      var menu = document.getElementById('mobileMenu');
+      var overlay = document.getElementById('overlay');
+      menu.classList.toggle('open');
+      overlay.classList.toggle('open');
+    }
+
+    window.addEventListener('scroll', function() {
+      var sticky = document.getElementById('searchSticky');
+      if (window.scrollY > 5) { sticky.classList.add('scrolled'); }
+      else { sticky.classList.remove('scrolled'); }
+    });
+
+    // Auth
+    var token = localStorage.getItem('token');
+    if (token) {
+      fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + token } })
+        .then(r => r.json())
+        .then(data => {
+          if (data.success) {
+            document.getElementById('desktopNav').innerHTML = '<a href="#" onclick="showFavorites();return false;"><i class="fas fa-heart"></i></a> <a href="#" onclick="logout();return false;">Logout</a>';
+            var mm = document.getElementById('mobileMenu');
+            mm.innerHTML = '<a href="index.html"><i class="fas fa-home"></i> Home</a><a href="#" onclick="showFavorites();return false;"><i class="fas fa-heart"></i> My Favorites</a><a href="#" onclick="showDeals();return false;"><i class="fas fa-fire"></i> Hot Deals</a><div style="border-top:1px solid #e5e5ea;margin:8px 0"></div><span style="display:block;padding:14px 16px;color:#8e8e93;font-size:0.9rem"><i class="fas fa-user"></i> ' + data.user.name + '</span><a href="#" onclick="logout();return false;"><i class="fas fa-sign-out-alt"></i> Logout</a>';
+          }
+        });
+    }
+    function logout() { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.reload(); }
+    function showFavorites() { alert('Login required to view saved favorites'); }
+    function showDeals() { document.getElementById('searchInput').value = 'deals'; doSearch(); }
+
+    function toggleFav(btn, id) {
+      btn.classList.toggle('saved');
+      var icon = btn.querySelector('i');
+      if (btn.classList.contains('saved')) { icon.className = 'fas fa-heart'; }
+      else { icon.className = 'far fa-heart'; }
+    }
+
+    // === CAMERA / IMAGE UPLOAD ===
+    var uploadedImageUrl = null;
+
+    function handleImageSelect(input) {
+      var file = input.files[0];
+      if (!file) return;
+
+      // Show preview
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('previewImg').src = e.target.result;
+        document.getElementById('previewFilename').textContent = file.name;
+        document.getElementById('imagePreviewArea').classList.add('show');
+      };
+      reader.readAsDataURL(file);
+
+      // Upload to server
+      var formData = new FormData();
+      formData.append('image', file);
+
+      fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          uploadedImageUrl = data.imageUrl;
+          // Try to extract a search term from filename and auto-search
+          var guess = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ').substring(0, 50);
+          if (guess && guess.length > 2) {
+            document.getElementById('searchInput').value = guess;
+            doSearch();
+          }
+        }
+      })
+      .catch(err => {
+        console.error('Upload failed:', err);
+      });
+    }
+
+    function removeImage() {
+      uploadedImageUrl = null;
+      document.getElementById('cameraInput').value = '';
+      document.getElementById('imagePreviewArea').classList.remove('show');
+      document.getElementById('previewImg').src = '';
+    }
+
+    function doSearch() {
+      var query = document.getElementById('searchInput').value.trim();
+      if (!query) return;
+      document.getElementById('heroSection').style.display = 'none';
+      document.querySelector('.stats-grid').style.display = 'none';
+
+      var sort = document.getElementById('sortSelect').value;
+      var minPrice = document.getElementById('minPrice').value;
+      var maxPrice = document.getElementById('maxPrice').value;
+      var country = document.getElementById('countrySelect').value;
+
+      var resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin fa-2x"></i><p style="margin-top:15px">Searching...</p></div>';
+      document.getElementById('stats').innerHTML = '';
+
+      var url = '/api/search?q=' + encodeURIComponent(query) + '&sort=' + sort + '&country=' + country;
+      if (minPrice) url += '&minPrice=' + minPrice;
+      if (maxPrice) url += '&maxPrice=' + maxPrice;
+
+      fetch(url)
+        .then(r => r.json())
+        .then(data => {
+          if (!data.success) { resultsDiv.innerHTML = '<div class="error"><i class="fas fa-exclamation-circle"></i><p>' + data.message + '</p></div>'; return; }
+          displayResults(data.results, data.count, query);
+        })
+        .catch(err => { resultsDiv.innerHTML = '<div class="error"><i class="fas fa-exclamation-circle"></i><p>Search failed. Please try again.</p></div>'; });
+    }
+
+    function displayResults(products, count, query) {
+      var resultsDiv = document.getElementById('results');
+      document.getElementById('stats').innerHTML = 'Found <strong style="color:#22c55e">' + count + '</strong> results for "' + query + '"';
+
+      if (!products || products.length === 0) {
+        resultsDiv.innerHTML = '<div class="no-results"><i class="fas fa-search fa-2x" style="color:#c7c7cc;margin-bottom:15px"></i><p>No products found. Try a different search.</p></div>';
+        return;
+      }
+
+      // Find min price to estimate "original" price for demo savings
+      var minP = Infinity;
+      for (var i = 0; i < products.length; i++) { if (products[i].price && products[i].price < minP) minP = products[i].price; }
+
+      var html = '';
+      for (var i = 0; i < products.length; i++) {
+        var p = products[i];
+        var price = p.price || 0;
+        var currency = p.currency === 'USD' ? '$' : (p.currency || '$');
+        var originalPrice = price > 0 ? (price * 1.35).toFixed(2) : '0.00';
+        var saveAmount = price > 0 ? (originalPrice - price).toFixed(2) : '0.00';
+        var priceDisplay = currency + ' ' + price.toFixed(2);
+        var originalDisplay = currency + ' ' + originalPrice;
+        var saveDisplay = price > 0 ? 'Save ' + currency + ' ' + saveAmount : '';
+        var imgUrl = p.image || NO_IMAGE;
+        var btnClass = 'btn-buy';
+        var btnText = 'Buy Now';
+        var btnHref = 'href="' + (p.product_url || '#') + '" target="_blank" rel="noopener"';
+
+        if (!p.product_url || p.product_url === '#') {
+          btnClass = 'btn-buy disabled'; btnText = 'No Link'; btnHref = 'href="#" onclick="return false;"';
+        }
+
+        html += '<div class="product-card">';
+        html += '<div class="product-image-wrap"><img src="' + imgUrl + '" alt="" onerror="this.src=\'' + NO_IMAGE + '\'" loading="lazy"></div>';
+        html += '<div class="product-info">';
+        html += '<div class="product-source">' + (p.source || 'Google Shopping') + '</div>';
+        html += '<div class="product-title">' + (p.title || 'Unknown Product') + '</div>';
+        html += '<div class="price-row">';
+        html += '<span class="price-current">' + priceDisplay + '</span>';
+        if (price > 0) html += '<span class="price-original">' + originalDisplay + '</span>';
+        html += '</div>';
+        if (saveDisplay) html += '<div class="price-save">' + saveDisplay + '</div>';
+        html += '<div class="btn-row">';
+        html += '<a ' + btnHref + ' class="' + btnClass + '">' + btnText + '</a>';
+        html += '<button class="btn-fav" onclick="toggleFav(this,' + i + ')"><i class="far fa-heart"></i></button>';
+        html += '</div></div></div>';
+      }
+      resultsDiv.innerHTML = html;
+    }
+  </script>
+</body>
+</html>
