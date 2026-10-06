@@ -10,24 +10,57 @@ const AFFILIATE_PROGRAMS = {
   'aliexpress.com': { tag: '?aff_fcid=' }
 };
 
+const MERCHANT_MAP = {
+  'amazon': 'amazon.com',
+  'ebay': 'ebay.com',
+  'walmart': 'walmart.com',
+  'best buy': 'bestbuy.com',
+  'bestbuy': 'bestbuy.com',
+  'target': 'target.com',
+  'staples': 'staples.com',
+  'newegg': 'newegg.com',
+  'newegg.com': 'newegg.com',
+  'aliexpress': 'aliexpress.com',
+  'hp': 'hp.com',
+  'lenovo': 'lenovo.com',
+  'microsoft': 'microsoft.com',
+  'microsoft store': 'microsoft.com',
+  'apple': 'apple.com',
+  'office depot': 'officedepot.com',
+  'razer': 'razer.com'
+};
+
+function normalizeMerchantName(source) {
+  if (!source) return '';
+  return source.split(' - ')[0].trim().toLowerCase();
+}
+
 function addAffiliateLink(product) {
   if (!product || !product.product_url) return product;
 
-  try {
-    var url = new URL(product.product_url);
-    var domain = url.hostname.replace(/^www\./, '');
-    var affiliate = AFFILIATE_PROGRAMS[domain];
+  let affiliate = null;
 
-    if (affiliate && !url.searchParams.has('tag') && !url.searchParams.has('campid')) {
-      product.original_url = product.product_url;
-      if (affiliate.tag.startsWith('?')) {
-        product.product_url = product.product_url + (product.product_url.includes('?') ? '&' : '?') + affiliate.tag.substring(1);
-      } else {
-        product.product_url = product.product_url + affiliate.tag;
-      }
-    }
-  } catch (e) {
-    // Invalid URL, skip affiliate injection
+  // Match by merchant name (source field) — PRIMARY method
+  if (product.source) {
+    const normalized = normalizeMerchantName(product.source);
+    const domain = MERCHANT_MAP[normalized];
+    if (domain) affiliate = AFFILIATE_PROGRAMS[domain];
+  }
+
+  // Fallback: match by URL domain
+  if (!affiliate) {
+    try {
+      const url = new URL(product.product_url);
+      const domain = url.hostname.replace(/^www\./, '');
+      affiliate = AFFILIATE_PROGRAMS[domain];
+    } catch (e) {}
+  }
+
+  if (affiliate) {
+    product.original_url = product.product_url;
+    const url = product.product_url;
+    const separator = url.includes('?') ? '&' : '?';
+    product.product_url = url + separator + affiliate.tag.substring(1);
   }
 
   return product;
