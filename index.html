@@ -4,6 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>PriceEngine</title>
+  <!-- Favicon & App Icons -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+  <!-- PWA Meta Tags -->
+  <meta name="theme-color" content="#1B1F3B">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PriceEngine">
+  <meta name="application-name" content="PriceEngine">
+  <meta name="msapplication-TileColor" content="#1B1F3B">
+  <meta name="msapplication-TileImage" content="/icon-192.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <!-- Google AdSense -->
@@ -785,11 +798,11 @@
         var url = p.product_url || '#';
         var ratingRow = p.rating ? '<div class="rating-row"><span class="rating-stars"><i class="fas fa-star"></i> ' + p.rating + '</span>' + (p.reviews ? '<span class="rating-count">(' + p.reviews + ' reviews)</span>' : '') + '</div>' : '';
 
-        html += '<a href="' + url + '" target="_blank" rel="noopener noreferrer" class="product-card-link">' +
+        html += '<div class="product-card-link" onclick="window.open(\'' + url + '\', \'_blank\', \'noopener,noreferrer\')">' +
           '<div class="product-card">' +
             '<div class="product-image-wrap">' +
               '<img src="' + img + '" alt="' + title + '" onerror="this.src=\'' + NO_IMAGE + '\'">' +
-              '<button class="product-fav-btn" onclick="event.preventDefault(); event.stopPropagation(); toggleFav(this, \'' + p.id + '\')"><i class="far fa-heart"></i></button>' +
+              '<button class="product-fav-btn" onclick="event.stopPropagation(); toggleFav(this, \'' + p.id + '\')"><i class="far fa-heart"></i></button>' +
             '</div>' +
             '<div class="product-info">' +
               '<div class="product-source">' + source + '</div>' +
@@ -800,10 +813,10 @@
               '</div>' +
               saveBadge +
               ratingRow +
-              '<div class="btn-buy">Buy Now</div>' +
+              '<div class="btn-buy">Buy Now <i class="fas fa-external-link-alt" style="font-size:0.8rem;margin-left:6px;opacity:0.7"></i></div>' +
             '</div>' +
           '</div>' +
-        '</a>';
+        '</div>';
       }
       resultsDiv.innerHTML = html;
 
