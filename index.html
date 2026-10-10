@@ -433,6 +433,8 @@
   <script>
     var NO_IMAGE='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2YyZjJmNyIvPjx0ZXh0IHg9IjE1MCIgeT0iMTUwIiBmb250LWZhbWlseT0iQXJpYWwsc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzhlOGU5MyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
 
+    function getRedirectUrl(url){ if(!url||url==='#')return'#'; return'/out?url='+encodeURIComponent(url); }
+
     /* ========== DARK MODE ========== */
     function toggleDarkMode(){
       document.body.classList.toggle('dark');
@@ -492,8 +494,8 @@
       sec.style.display='block';
       var html='';
       for(var i=0;i<rv.length;i++){
-        var r=rv[i]; var cur=r.currency==='USD'?'$':(r.currency||'$');
-        html+='<div class="rv-card" onclick="window.open(\''+r.url+'\',\'_blank\')">'+
+        var r=rv[i]; var cur=r.currency==='USD'?'$':(r.currency||'$'); var red=getRedirectUrl(r.url);
+        html+='<div class="rv-card" onclick="window.open(\''+red+'\',\'_blank\')">'+
           '<img src="'+(r.image||NO_IMAGE)+'" onerror="this.src=\''+NO_IMAGE+'\'">'+
           '<div class="rv-info"><div class="rv-price">'+cur+' '+r.price.toFixed(2)+'</div><div class="rv-name">'+r.title+'</div></div></div>';
       }
@@ -633,7 +635,8 @@
         var isFav=isGuestFav(p.id);
         var productJson=JSON.stringify({id:p.id,title:title,price:price,currency:p.currency||'USD',image:p.image||NO_IMAGE,url:url,source:source}).replace(/"/g,'&quot;');
 
-        html+='<div class="product-card-link" id="'+cardId+'" data-url="'+url+'" data-title="'+title.replace(/"/g,'&quot;')+'" data-source="'+source+'" onclick="trackProductClick(this);addRecentlyViewed('+productJson+');window.open(\''+url+'\',\'_blank\',\'noopener,noreferrer\')">'+
+        var redirectUrl=getRedirectUrl(url);
+        html+='<div class="product-card-link" id="'+cardId+'" data-url="'+url+'" data-redirect="'+redirectUrl+'" data-title="'+title.replace(/"/g,'&quot;')+'" data-source="'+source+'" onclick="trackProductClick(this);addRecentlyViewed('+productJson+');window.open(\''+redirectUrl+'\',\'_blank\',\'noopener,noreferrer\')">'+
           '<div class="product-card">'+
             '<div class="product-image-wrap" data-images="'+images.length+'">'+
               '<div class="view-badge pulse" id="badge_'+cardId+'"><i class="fas fa-fire"></i> <span class="view-count">0</span> viewing</div>'+
@@ -663,10 +666,10 @@
 
     /* ========== SHARE ========== */
     var currentShareUrl='', currentShareTitle='', currentSharePrice='';
-    function openShare(url,title,price){ currentShareUrl=url; currentShareTitle=title; currentSharePrice=price; document.getElementById('shareWA').href='https://wa.me/?text='+encodeURIComponent('Check out this deal on PriceEngine: '+title+' - '+price+' '+url); document.getElementById('shareSMS').href='sms:?&body='+encodeURIComponent('Deal: '+title+' - '+price+' '+url); document.getElementById('shareModal').classList.add('show'); }
+    function openShare(url,title,price){ var redirect=getRedirectUrl(url); currentShareUrl=redirect; currentShareTitle=title; currentSharePrice=price; document.getElementById('shareWA').href='https://wa.me/?text='+encodeURIComponent('Check out this deal on PriceEngine: '+title+' - '+price+' '+window.location.origin+redirect); document.getElementById('shareSMS').href='sms:?&body='+encodeURIComponent('Deal: '+title+' - '+price+' '+window.location.origin+redirect); document.getElementById('shareModal').classList.add('show'); }
     function closeShareModal(){ document.getElementById('shareModal').classList.remove('show'); }
     function copyShareLink(){ navigator.clipboard.writeText(currentShareUrl).then(function(){alert('Link copied!');closeShareModal();}).catch(function(){alert('Could not copy link');}); }
-    function copyProductLink(url){ navigator.clipboard.writeText(url).then(function(){alert('Product link copied!');}).catch(function(){alert('Could not copy');}); }
+    function copyProductLink(url){ var redirect=window.location.origin+getRedirectUrl(url); navigator.clipboard.writeText(redirect).then(function(){alert('Link copied!');}).catch(function(){alert('Could not copy');}); }
 
     /* ========== PRICE ALERT ========== */
     var alertProductUrl='';
@@ -698,7 +701,7 @@
       html+='<tr><td>Title</td>'; for(var i=0;i<compareList.length;i++)html+='<td>'+compareList[i].title+'</td>'; html+='</tr>';
       html+='<tr><td>Price</td>'; for(var i=0;i<compareList.length;i++){ var cur=compareList[i].currency==='USD'?'$':(compareList[i].currency||'$'); html+='<td class="c-price">'+cur+' '+compareList[i].price.toFixed(2)+'</td>'; } html+='</tr>';
       html+='<tr><td>Store</td>'; for(var i=0;i<compareList.length;i++)html+='<td>'+compareList[i].source+'</td>'; html+='</tr>';
-      html+='<tr><td>Link</td>'; for(var i=0;i<compareList.length;i++)html+='<td><a href="'+compareList[i].url+'" target="_blank" class="c-link">Buy Now</a></td>'; html+='</tr>';
+      html+='<tr><td>Link</td>'; for(var i=0;i<compareList.length;i++)html+='<td><a href="'+getRedirectUrl(compareList[i].url)+'" target="_blank" class="c-link">Buy Now</a></td>'; html+='</tr>';
       html+='</tbody></table>';
       document.getElementById('compareContent').innerHTML=html; document.getElementById('compareModal').classList.add('show');
     }

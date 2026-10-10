@@ -78,6 +78,27 @@ app.use('/api/search', require('./search'));
 app.use('/api/favorites', require('./favorites'));
 app.use('/api/upload', require('./upload'));
 
+// Redirect endpoint for shared links — ensures shared product URLs always work
+app.get('/out', (req, res) => {
+  var targetUrl = req.query.url;
+  if (!targetUrl) {
+    return res.redirect('/');
+  }
+  try {
+    var decoded = decodeURIComponent(targetUrl);
+    // Add Amazon affiliate tag if it's an Amazon link without one
+    if (decoded.includes('amazon.com') || decoded.includes('amazon.')) {
+      var separator = decoded.includes('?') ? '&' : '?';
+      if (!decoded.includes('tag=')) {
+        decoded += separator + 'tag=priceeengine08-20';
+      }
+    }
+    res.redirect(decoded);
+  } catch (e) {
+    res.redirect('/');
+  }
+});
+
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ success: false, message: 'Something went wrong!' });
