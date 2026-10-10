@@ -348,7 +348,7 @@
     </div>
     <div class="sub-nav" id="subNav">
       <button class="sub-all" onclick="toggleMenu()"><i class="fas fa-bars"></i> All</button>
-      <a href="#" onclick="pickCategoryByName('Deals');return false;">Today's Deals</a>
+      <a href="#" onclick="showTodaysDeals();return false;">Today's Deals</a>
       <a href="#" onclick="pickCategoryByName('Electronics');return false;">Electronics</a>
       <a href="#" onclick="pickCategoryByName('Fashion');return false;">Fashion</a>
       <a href="#" onclick="pickCategoryByName('Home');return false;">Home</a>
@@ -531,7 +531,8 @@
         .then(function(data){ if(data.success){ document.getElementById('desktopNav').innerHTML='<a href="#" onclick="showGuestFavorites();return false;"><i class="fas fa-heart"></i></a> <a href="#" onclick="logout();return false;">Logout</a>'; var mm=document.getElementById('mobileMenu'); mm.innerHTML='<a href="index.html"><i class="fas fa-home"></i> Home</a><a href="#" onclick="showGuestFavorites();return false;"><i class="fas fa-heart"></i> My Favorites</a><a href="#" onclick="showDeals();return false;"><i class="fas fa-fire"></i> Hot Deals</a><div style="border-top:1px solid var(--border);margin:8px 0"></div><span style="display:block;padding:14px 16px;color:var(--muted);font-size:.9rem"><i class="fas fa-user"></i> '+data.user.name+'</span><a href="#" onclick="logout();return false;"><i class="fas fa-sign-out-alt"></i> Logout</a>'; } });
     }
     function logout(){ localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.reload(); }
-    function showDeals(){ document.getElementById('searchInput').value='deals'; doSearch(); }
+    function showTodaysDeals(){ document.getElementById('searchInput').value='jewelry'; doSearch(); }
+    function showDeals(){ document.getElementById('searchInput').value='dresses'; doSearch(); }
 
     /* ========== GUEST FAVORITES ========== */
     function getGuestFavs(){ try{ return JSON.parse(localStorage.getItem('pe_favs')||'[]'); }catch(e){ return []; } }
