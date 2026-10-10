@@ -1,6 +1,36 @@
 const { getJson } = require('serpapi');
 const affiliateService = require('./affiliateService');
 
+// === Search Cache ===
+// Caches SerpAPI results for 10 minutes to save API credits
+var searchCache = {};
+var CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+
+function getCacheKey(query, options) {
+  return JSON.stringify({
+    q: query.toLowerCase().trim(),
+    c: options.country || 'US',
+    s: options.sort || 'relevance',
+    min: options.minPrice || '',
+    max: options.maxPrice || '',
+    l: options.limit || 50
+  });
+}
+
+function getCached(key) {
+  var entry = searchCache[key];
+  if (!entry) return null;
+  if (Date.now() - entry.time > CACHE_TTL_MS) {
+    delete searchCache[key];
+    return null;
+  }
+  return entry.data;
+}
+
+function setCached(key, data) {
+  searchCache[key] = { time: Date.now(), data: data };
+}
+
 const SUPPORTED_COUNTRIES = {
   'US': { gl: 'us', hl: 'en', ebay: 'EBAY_US' },
   'UK': { gl: 'uk', hl: 'en', ebay: 'EBAY_GB' },
@@ -20,6 +50,14 @@ async function search(query, options) {
   try {
     var countryConfig = SUPPORTED_COUNTRIES[options.country] || SUPPORTED_COUNTRIES['US'];
     var limit = options.limit || 50;
+    var cacheKey = getCacheKey(query, options);
+
+    // Check cache first (saves SerpAPI credits!)
+    var cached = getCached(cacheKey);
+    if (cached) {
+      console.log('[CACHE HIT] Returning cached results for:', query);
+      return cached;
+    }
 
     // Search both SerpAPI Google Shopping AND eBay in parallel
     var [googleResults, ebayResults] = await Promise.allSettled([
@@ -53,7 +91,15 @@ async function search(query, options) {
       products.sort((a, b) => (b.rating || 0) - (a.rating || 0));
     }
 
-    return products.slice(0, limit);
+    var result = products.slice(0, limit);
+
+    // Cache successful results (10 min TTL)
+    if (result.length > 0) {
+      setCached(cacheKey, result);
+      console.log('[CACHE SET] Cached', result.length, 'results for:', query);
+    }
+
+    return result;
   } catch (error) {
     console.error('Search service error:', error);
     return generateDemoResults(query, options);
