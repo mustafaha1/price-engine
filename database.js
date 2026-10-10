@@ -68,6 +68,17 @@ function createTables() {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )`);
 
+      db.run(`CREATE TABLE IF NOT EXISTS price_alerts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT NOT NULL,
+        product_url TEXT,
+        product_title TEXT,
+        target_price REAL NOT NULL,
+        current_price REAL,
+        notified INTEGER DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )`);
+
       db.run(`CREATE UNIQUE INDEX IF NOT EXISTS idx_product_views_url ON product_views(product_url)`, (err) => {
         if (err) reject(err);
         else {

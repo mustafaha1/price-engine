@@ -65,6 +65,12 @@ async function search(query, options) {
           }
         }
 
+        var stockStatus = 'unknown';
+        if (item.in_stock !== undefined) stockStatus = item.in_stock ? 'in' : 'out';
+        else if (item.availability && item.availability.toLowerCase().includes('out')) stockStatus = 'out';
+        else if (item.availability && item.availability.toLowerCase().includes('in')) stockStatus = 'in';
+        else if (item.availability && item.availability.toLowerCase().includes('low')) stockStatus = 'low';
+
         var product = {
           id: 'gshop_' + index + '_' + Date.now(),
           title: item.title || 'Unknown Product',
@@ -77,6 +83,7 @@ async function search(query, options) {
           source: item.source || extractDomain(url) || 'Google Shopping',
           rating: item.rating ? parseFloat(item.rating) : null,
           reviews: item.reviews ? parseInt(item.reviews) : null,
+          stock: stockStatus,
           position: index + 1
         };
 
@@ -138,6 +145,7 @@ function generateDemoResults(query, options) {
     if (options.minPrice) basePrice = Math.max(basePrice, options.minPrice);
     if (options.maxPrice) basePrice = Math.min(basePrice, options.maxPrice);
 
+    var stocks = ['in', 'in', 'in', 'low', 'out', 'in'];
     results.push({
       id: 'demo_' + i,
       title: query + ' - ' + sources[i % sources.length] + ' Option ' + (i + 1),
@@ -150,6 +158,7 @@ function generateDemoResults(query, options) {
       source: sources[i % sources.length],
       rating: 3 + Math.random() * 2,
       reviews: Math.floor(Math.random() * 5000),
+      stock: stocks[i % stocks.length],
       position: i + 1
     });
   }

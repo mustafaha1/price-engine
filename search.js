@@ -188,4 +188,33 @@ router.get('/views', async (req, res) => {
   }
 });
 
+router.post('/price-alert', async (req, res) => {
+  try {
+    var email = req.body.email;
+    var productUrl = req.body.productUrl;
+    var productTitle = req.body.productTitle;
+    var targetPrice = req.body.targetPrice;
+
+    if (!email || !targetPrice) {
+      return res.status(400).json({ success: false, message: 'Email and target price are required' });
+    }
+
+    var db = getDb();
+    db.run(
+      'INSERT INTO price_alerts (email, product_url, product_title, target_price) VALUES (?, ?, ?, ?)',
+      [email, productUrl || '', productTitle || '', targetPrice],
+      function(err) {
+        if (err) {
+          console.error('Price alert error:', err);
+          return res.status(500).json({ success: false, message: 'Failed to set alert' });
+        }
+        res.json({ success: true, message: 'Price alert set successfully' });
+      }
+    );
+  } catch (error) {
+    console.error('Price alert error:', error);
+    res.status(500).json({ success: false, message: 'Failed to set alert' });
+  }
+});
+
 module.exports = router;
