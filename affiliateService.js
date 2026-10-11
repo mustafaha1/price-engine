@@ -6,7 +6,8 @@ const AFFILIATE_PROGRAMS = {
   'amazon.de': { tag: '?tag=priceeengine08-20' },
 
   // eBay domains
-  'ebay.com': { tag: '?campid=5338728001' },
+  'ebay.com': { tag: '?campid=5339220900&mkevt=1&toolid=80005&mkcid=1' },
+  'ebay.co.uk': { tag: '?campid=5339220900&mkevt=1&toolid=80005&mkcid=1' },
 
   // Walmart domains
   'walmart.com': { tag: '?affp1=priceengine' },
