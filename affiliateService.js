@@ -46,7 +46,38 @@ const AFFILIATE_PROGRAMS = {
   'bestbuy.com': { tag: '?ref=priceengine' },
 
   // AliExpress
-  'aliexpress.com': { tag: '?aff_fcid=' }
+  'aliexpress.com': { tag: '?aff_fcid=priceengine' },
+
+  // Shein (Awin) — UPDATE with your Awin tracking ID when approved
+  // Format: ?awc=YOUR_AWIN_ID
+  // Replace 'YOUR_AWIN_ID' with your actual Awin publisher ID once approved
+  'shein.com': { tag: '?awc=YOUR_AWIN_ID' },
+  'shein.co.uk': { tag: '?awc=YOUR_AWIN_ID' },
+  'shein.us': { tag: '?awc=YOUR_AWIN_ID' },
+  'shein.de': { tag: '?awc=YOUR_AWIN_ID' },
+  'shein.fr': { tag: '?awc=YOUR_AWIN_ID' },
+  'shein.it': { tag: '?awc=YOUR_AWIN_ID' },
+  'shein.es': { tag: '?awc=YOUR_AWIN_ID' },
+  'shein.nl': { tag: '?awc=YOUR_AWIN_ID' },
+  'shein.pl': { tag: '?awc=YOUR_AWIN_ID' },
+  'shein.se': { tag: '?awc=YOUR_AWIN_ID' },
+  'shein.com.au': { tag: '?awc=YOUR_AWIN_ID' },
+  'shein.co.jp': { tag: '?awc=YOUR_AWIN_ID' },
+  'shein.com.mx': { tag: '?awc=YOUR_AWIN_ID' },
+  'shein.com.br': { tag: '?awc=YOUR_AWIN_ID' },
+  'shein.com.tr': { tag: '?awc=YOUR_AWIN_ID' },
+  'shein.ae': { tag: '?awc=YOUR_AWIN_ID' },
+  'shein.sa': { tag: '?awc=YOUR_AWIN_ID' },
+  'shein.com.sg': { tag: '?awc=YOUR_AWIN_ID' },
+  'shein.com.my': { tag: '?awc=YOUR_AWIN_ID' },
+  'shein.co.id': { tag: '?awc=YOUR_AWIN_ID' },
+  'shein.co.th': { tag: '?awc=YOUR_AWIN_ID' },
+  'shein.com.ph': { tag: '?awc=YOUR_AWIN_ID' },
+  'shein.vn': { tag: '?awc=YOUR_AWIN_ID' },
+  'shein.kr': { tag: '?awc=YOUR_AWIN_ID' },
+  'shein.tw': { tag: '?awc=YOUR_AWIN_ID' },
+  'shein.hk': { tag: '?awc=YOUR_AWIN_ID' },
+  'shein.in': { tag: '?awc=YOUR_AWIN_ID' }
 };
 
 // Map merchant names from SerpAPI "source" field to affiliate programs
@@ -115,6 +146,36 @@ const MERCHANT_MAP = {
   // AliExpress
   'aliexpress': 'aliexpress.com',
   'aliexpress.com': 'aliexpress.com',
+
+  // Shein — all regional domains
+  'shein': 'shein.com',
+  'shein.com': 'shein.com',
+  'shein.co.uk': 'shein.co.uk',
+  'shein.us': 'shein.us',
+  'shein.de': 'shein.de',
+  'shein.fr': 'shein.fr',
+  'shein.it': 'shein.it',
+  'shein.es': 'shein.es',
+  'shein.nl': 'shein.nl',
+  'shein.pl': 'shein.pl',
+  'shein.se': 'shein.se',
+  'shein.com.au': 'shein.com.au',
+  'shein.co.jp': 'shein.co.jp',
+  'shein.com.mx': 'shein.com.mx',
+  'shein.com.br': 'shein.com.br',
+  'shein.com.tr': 'shein.com.tr',
+  'shein.ae': 'shein.ae',
+  'shein.sa': 'shein.sa',
+  'shein.com.sg': 'shein.com.sg',
+  'shein.com.my': 'shein.com.my',
+  'shein.co.id': 'shein.co.id',
+  'shein.co.th': 'shein.co.th',
+  'shein.com.ph': 'shein.com.ph',
+  'shein.vn': 'shein.vn',
+  'shein.kr': 'shein.kr',
+  'shein.tw': 'shein.tw',
+  'shein.hk': 'shein.hk',
+  'shein.in': 'shein.in',
 
   // HP
   'hp': 'hp.com',
