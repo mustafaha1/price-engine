@@ -164,6 +164,19 @@ async function searchGoogleShopping(query, countryConfig, options, limit) {
       var detectedSource = (item.source || '').toLowerCase();
       var isGoogleUrl = url.includes('google.com/search') || url.includes('google.com/shopping');
 
+      // Map eBay domains to correct regional domain (prevents eBay redirect kick-out)
+      if (url.includes('ebay.com') && !url.includes('ebay.co.uk') && countryConfig.gl === 'GB') {
+        url = url.replace('ebay.com', 'ebay.co.uk');
+      } else if (url.includes('ebay.com') && !url.includes('ebay.de') && countryConfig.gl === 'DE') {
+        url = url.replace('ebay.com', 'ebay.de');
+      } else if (url.includes('ebay.com') && !url.includes('ebay.fr') && countryConfig.gl === 'FR') {
+        url = url.replace('ebay.com', 'ebay.fr');
+      } else if (url.includes('ebay.com') && !url.includes('ebay.ca') && countryConfig.gl === 'CA') {
+        url = url.replace('ebay.com', 'ebay.ca');
+      } else if (url.includes('ebay.com') && !url.includes('ebay.com.au') && countryConfig.gl === 'AU') {
+        url = url.replace('ebay.com', 'ebay.com.au');
+      }
+
       // If Google gives us a knowledge panel URL (not a direct merchant link),
       // build a direct merchant search URL with affiliate tag instead
       if (isGoogleUrl || url === '#' || !url.startsWith('http')) {
