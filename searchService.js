@@ -185,13 +185,13 @@ async function searchGoogleShopping(query, countryConfig, options, limit) {
         } else if (detectedSource.includes('target')) {
           url = 'https://www.target.com/s?searchTerm=' + searchQuery;
         } else if (detectedSource.includes('ebay')) {
-          // Direct eBay search with affiliate campid already attached
+          // Direct eBay search (campid only works on item pages, not search pages)
           var ebayDomain = 'ebay.com';
           if (countryConfig.gl === 'GB') ebayDomain = 'ebay.co.uk';
           else if (countryConfig.gl === 'DE') ebayDomain = 'ebay.de';
           else if (countryConfig.gl === 'CA') ebayDomain = 'ebay.ca';
           else if (countryConfig.gl === 'AU') ebayDomain = 'ebay.com.au';
-          url = 'https://www.' + ebayDomain + '/sch/i.html?_nkw=' + searchQuery + '&campid=5339220900&mkevt=1&toolid=80005&mkcid=1';
+          url = 'https://www.' + ebayDomain + '/sch/i.html?_nkw=' + searchQuery;
         } else {
           // Unknown source — keep Google search as fallback
           url = 'https://www.google.com/search?q=' + searchQuery;

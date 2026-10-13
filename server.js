@@ -93,8 +93,9 @@ app.get('/out', (req, res) => {
         decoded += separator + 'tag=priceeengine08-20';
       }
     }
-    // Add eBay affiliate tag if it's an eBay link without one
-    if (decoded.includes('ebay.com') || decoded.includes('ebay.')) {
+    // Add eBay affiliate tag if it's an eBay ITEM link (not search page)
+    // campid only works on /itm/ pages, causes kick-out on /sch/ search pages
+    if ((decoded.includes('ebay.com') || decoded.includes('ebay.')) && decoded.includes('/itm/')) {
       var sep = decoded.includes('?') ? '&' : '?';
       if (!decoded.includes('campid=')) {
         decoded += sep + 'campid=5339220900&mkevt=1&toolid=80005&mkcid=1';
