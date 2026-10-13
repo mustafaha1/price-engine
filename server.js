@@ -101,7 +101,17 @@ app.get('/out', (req, res) => {
         decoded += sep + 'campid=5339220900&mkevt=1&toolid=80005&mkcid=1';
       }
     }
-    res.redirect(decoded);
+    // Return HTML page with PriceEngine title + JS replace()
+    // window.location.replace() removes this /out page from browser history
+    // So when user taps BACK from the store, they go straight to PriceEngine
+    res.send('<!DOCTYPE html><html><head><title>PriceEngine</title><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
+      '<style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;text-align:center;padding:60px 20px;color:#333;background:#fff}' +
+      '.logo{font-size:22px;font-weight:800;color:#1B1F3B;margin-bottom:12px;letter-spacing:-0.3px}' +
+      '.msg{color:#888;font-size:14px}</style></head><body>' +
+      '<div class="logo">PriceEngine</div>' +
+      '<div class="msg">Redirecting to store...</div>' +
+      '<script>window.location.replace("' + decoded.replace(/"/g, '&quot;') + '");</script>' +
+      '</body></html>');
   } catch (e) {
     res.redirect('/');
   }
