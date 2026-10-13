@@ -101,7 +101,16 @@ app.get('/out', (req, res) => {
         decoded += sep + 'campid=5339220900&mkevt=1&toolid=80005&mkcid=1';
       }
     }
-    res.redirect(decoded);
+    // Return HTML page with PriceEngine title + JS redirect
+    // This ensures Safari back button shows "PriceEngine" not "Railway"
+    res.send('<!DOCTYPE html><html><head><title>PriceEngine</title><meta charset="UTF-8">' +
+      '<style>body{font-family:Arial,sans-serif;text-align:center;padding:50px;color:#333}' +
+      '.logo{font-size:24px;font-weight:bold;color:#1B1F3B;margin-bottom:20px}' +
+      '.msg{color:#666}</style></head><body>' +
+      '<div class="logo">PriceEngine</div>' +
+      '<div class="msg">Redirecting to store...</div>' +
+      '<script>window.location.replace("' + decoded.replace(/"/g, '&quot;') + '");</script>' +
+      '</body></html>');
   } catch (e) {
     res.redirect('/');
   }
