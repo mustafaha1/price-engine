@@ -611,7 +611,7 @@
       var html='';
       for(var i=0;i<rv.length;i++){
         var r=rv[i]; var cur=r.currency==='USD'?'$':(r.currency||'$'); var red=getRedirectUrl(r.url);
-        html+='<div class="rv-card" onclick="window.open(\''+red+'\',\'_blank\')">'+
+        html+='<div class="rv-card" onclick="window.location.href=\''+red+'\'">'+
           '<img src="'+(r.image||NO_IMAGE)+'" onerror="this.src=\''+NO_IMAGE+'\'">'+
           '<div class="rv-info"><div class="rv-price">'+cur+' '+r.price.toFixed(2)+'</div><div class="rv-name">'+r.title+'</div></div></div>';
       }
@@ -776,7 +776,7 @@
         var productJson=JSON.stringify({id:p.id,title:title,price:price,currency:p.currency||'USD',image:p.image||NO_IMAGE,url:url,source:source}).replace(/"/g,'&quot;');
 
         var redirectUrl=getRedirectUrl(url);
-        html+='<div class="product-card-link" id="'+cardId+'" data-url="'+url+'" data-redirect="'+redirectUrl+'" data-title="'+title.replace(/"/g,'&quot;')+'" data-source="'+source+'" onclick="trackProductClick(this);addRecentlyViewed('+productJson+');window.open(\''+redirectUrl+'\',\'_blank\',\'noopener,noreferrer\')">'+
+        html+='<div class="product-card-link" id="'+cardId+'" data-url="'+url+'" data-redirect="'+redirectUrl+'" data-title="'+title.replace(/"/g,'&quot;')+'" data-source="'+source+'" onclick="trackProductClick(this);addRecentlyViewed('+productJson+');window.location.href=\''+redirectUrl+'\'">'+
           '<div class="product-card">'+
             '<div class="product-image-wrap" data-images="'+images.length+'">'+
               '<div class="view-badge pulse" id="badge_'+cardId+'"><i class="fas fa-fire"></i> <span class="view-count">0</span> viewing</div>'+
