@@ -408,15 +408,15 @@
   <!-- Filter Bar -->
   <div class="filter-sticky" id="searchSticky">
     <div class="filter-bar">
-      <select id="sortSelect">
+      <select id="sortSelect" onchange="doSearch()">
         <option value="relevance">Relevance</option>
         <option value="price_asc">Price: Low to High</option>
         <option value="price_desc">Price: High to Low</option>
         <option value="rating">Highest Rated</option>
       </select>
-      <input type="number" id="minPrice" placeholder="Min $">
-      <input type="number" id="maxPrice" placeholder="Max $">
-      <select id="countrySelect">
+      <input type="number" id="minPrice" placeholder="Min $" onchange="doSearch()">
+      <input type="number" id="maxPrice" placeholder="Max $" onchange="doSearch()">
+      <select id="countrySelect" onchange="doSearch()">
         <option value="US">US</option><option value="UK">UK</option><option value="CA">CA</option><option value="AU">AU</option>
         <option value="DE">DE</option><option value="FR">FR</option><option value="IT">IT</option><option value="ES">ES</option>
         <option value="NL">NL</option><option value="BR">BR</option><option value="IN">IN</option><option value="JP">JP</option>

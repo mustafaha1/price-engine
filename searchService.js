@@ -1,5 +1,6 @@
 const { getJson } = require('serpapi');
 const affiliateService = require('./affiliateService');
+const crypto = require('crypto');
 
 // === Search Cache ===
 // Caches SerpAPI results for 10 minutes to save API credits
@@ -59,10 +60,11 @@ async function search(query, options) {
       return cached;
     }
 
-    // Search both SerpAPI Google Shopping AND eBay in parallel
-    var [googleResults, ebayResults] = await Promise.allSettled([
+    // Search SerpAPI Google Shopping, eBay, AND AliExpress in parallel
+    var [googleResults, ebayResults, aliResults] = await Promise.allSettled([
       searchGoogleShopping(query, countryConfig, options, limit),
-      searchEbay(query, countryConfig, options, limit)
+      searchEbay(query, countryConfig, options, limit),
+      searchAliExpress(query, options, limit)
     ]);
 
     var products = [];
@@ -75,6 +77,11 @@ async function search(query, options) {
     // Add eBay results
     if (ebayResults.status === 'fulfilled' && ebayResults.value) {
       products = products.concat(ebayResults.value);
+    }
+
+    // Add AliExpress results
+    if (aliResults.status === 'fulfilled' && aliResults.value) {
+      products = products.concat(aliResults.value);
     }
 
     // If both failed, return demo results
@@ -265,6 +272,129 @@ async function searchEbay(query, countryConfig, options, limit) {
 
   } catch (error) {
     console.error('eBay search error:', error.message);
+    return [];
+  }
+}
+
+/* ========== ALIEXPRESS AFFILIATE API ========== */
+// Docs: https://portals.aliexpress.com/helpcenter/api/doku.php?id=products
+// Requires env vars: ALIEXPRESS_APP_KEY, ALIEXPRESS_APP_SECRET, ALIEXPRESS_TRACKING_ID
+
+async function searchAliExpress(query, options, limit) {
+  var appKey = process.env.ALIEXPRESS_APP_KEY;
+  var appSecret = process.env.ALIEXPRESS_APP_SECRET;
+  var trackingId = process.env.ALIEXPRESS_TRACKING_ID;
+
+  if (!appKey || !appSecret) {
+    console.log('AliExpress API keys not set, skipping AliExpress search');
+    return [];
+  }
+
+  try {
+    var timestamp = Date.now().toString();
+    var pageSize = Math.min(limit, 50);
+
+    // Build params for signature (alphabetical order, no sign yet)
+    var params = {
+      app_key: appKey,
+      format: 'json',
+      keywords: query,
+      method: 'aliexpress.affiliate.product.query',
+      page_size: String(pageSize),
+      sign_method: 'md5',
+      timestamp: timestamp,
+      tracking_id: trackingId || 'priceengine',
+      v: '2.0'
+    };
+
+    // Build signature string: secret + sorted(key+value) + secret
+    var sortedKeys = Object.keys(params).sort();
+    var signStr = appSecret;
+    for (var i = 0; i < sortedKeys.length; i++) {
+      var k = sortedKeys[i];
+      signStr += k + params[k];
+    }
+    signStr += appSecret;
+
+    var sign = crypto.createHash('md5').update(signStr).digest('hex').toUpperCase();
+
+    // Build query string (same alphabetical order)
+    var qsParts = [];
+    for (var j = 0; j < sortedKeys.length; j++) {
+      var sk = sortedKeys[j];
+      qsParts.push(encodeURIComponent(sk) + '=' + encodeURIComponent(params[sk]));
+    }
+    qsParts.push('sign=' + encodeURIComponent(sign));
+
+    var url = 'https://api-sg.aliexpress.com/sync?' + qsParts.join('&');
+
+    var response = await fetch(url, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' }
+    });
+
+    if (!response.ok) {
+      throw new Error('AliExpress API HTTP ' + response.status);
+    }
+
+    var data = await response.json();
+
+    // Parse AliExpress response
+    var respResult = data.aliexpress_affiliate_product_query_response ||
+                     data.resp_result ||
+                     data;
+
+    var result = respResult.result || respResult;
+    if (!result) {
+      console.log('AliExpress API: no result field');
+      return [];
+    }
+
+    var productsData = result.products || (result.product ? { product: result.product } : null);
+    if (!productsData) {
+      console.log('AliExpress API: no products found');
+      return [];
+    }
+
+    var items = Array.isArray(productsData.product) ? productsData.product : (productsData.product ? [productsData.product] : []);
+
+    return items.map(function(item, index) {
+      var title = item.product_title || 'AliExpress Product';
+      var priceStr = item.sale_price || item.target_sale_price || '0';
+      var price = parseFloat(priceStr) || 0;
+      var originalPrice = item.original_price || item.target_original_price || priceStr;
+      var currency = 'USD';
+      var image = item.product_main_image_url || item.product_small_image_urls?.string?.[0] || null;
+      var productUrl = item.product_detail_url || item.promotion_link || '#';
+      var rating = item.evaluate_rate ? parseFloat(item.evaluate_rate) : null;
+      var sales = item.lastest_volume ? parseInt(item.lastest_volume) : null;
+      var shop = item.shop_name || item.store_name || 'AliExpress';
+
+      // Add affiliate tracking to URL
+      if (productUrl && productUrl !== '#' && trackingId) {
+        var sep = productUrl.includes('?') ? '&' : '?';
+        productUrl = productUrl + sep + 'aff_fcid=' + encodeURIComponent(trackingId);
+      }
+
+      return {
+        id: 'ali_' + (item.product_id || index) + '_' + Date.now(),
+        title: title,
+        description: '',
+        price: price,
+        currency: currency,
+        image: image,
+        images: [image],
+        product_url: productUrl,
+        source: 'AliExpress',
+        rating: rating,
+        reviews: sales,
+        stock: 'in',
+        position: index + 1
+      };
+    }).filter(function(item) { return item.price > 0; });
+
+  } catch (error) {
+    console.error('AliExpress search error:', error.message);
     return [];
   }
 }

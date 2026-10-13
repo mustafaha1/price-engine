@@ -48,10 +48,10 @@ const AFFILIATE_PROGRAMS = {
   // AliExpress
   'aliexpress.com': { tag: '?aff_fcid=priceengine' },
 
-  // Shein (Awin) — UPDATE with your Awin tracking ID when approved
-  // Format: ?awc=YOUR_AWIN_ID
-  // Replace 'YOUR_AWIN_ID' with your actual Awin publisher ID once approved
-  'shein.com': { tag: '?awc=YOUR_AWIN_ID' },
+  // Shein (Awin) — Awin Publisher ID: 3122659
+  // Format: ?awc=PUBLISHER_ID
+  // Note: Full Awin deep links require program ID (awinmid) — update when Shein approves
+  'shein.com': { tag: '?awc=3122659' },
   'shein.co.uk': { tag: '?awc=YOUR_AWIN_ID' },
   'shein.us': { tag: '?awc=YOUR_AWIN_ID' },
   'shein.de': { tag: '?awc=YOUR_AWIN_ID' },
