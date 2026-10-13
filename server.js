@@ -93,6 +93,13 @@ app.get('/out', (req, res) => {
         decoded += separator + 'tag=priceeengine08-20';
       }
     }
+    // Add eBay affiliate tag if it's an eBay link without one
+    if (decoded.includes('ebay.com') || decoded.includes('ebay.')) {
+      var sep = decoded.includes('?') ? '&' : '?';
+      if (!decoded.includes('campid=')) {
+        decoded += sep + 'campid=5339220900&mkevt=1&toolid=80005&mkcid=1';
+      }
+    }
     res.redirect(decoded);
   } catch (e) {
     res.redirect('/');
