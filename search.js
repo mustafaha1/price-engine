@@ -30,9 +30,9 @@ router.get('/', async (req, res) => {
       category: (category && /^[a-z]{3,20}$/.test(category)) ? category : undefined,
       minPrice: (minPrice && !isNaN(minPrice) && minPrice >= 0 && minPrice <= 1000000) ? parseFloat(minPrice) : undefined,
       maxPrice: (maxPrice && !isNaN(maxPrice) && maxPrice >= 0 && maxPrice <= 1000000) ? parseFloat(maxPrice) : undefined,
-      limit: (limit && !isNaN(limit) && limit > 0 && limit <= 100) ? parseInt(limit) : 50,
+      limit: (limit && !isNaN(limit) && limit > 0 && limit <= 100) ? parseInt(limit) : 60,
       country: (country && /^[A-Za-z]{2}$/.test(country)) ? country.toUpperCase() : 'US',
-      sort: ['price_asc', 'price_desc', 'rating'].includes(sort) ? sort : 'price_asc'
+      sort: ['relevance', 'price_asc', 'price_desc', 'rating'].includes(sort) ? sort : 'relevance'
     };
 
     var results = await searchService.search(q, options);
@@ -66,7 +66,7 @@ router.get('/by-image', async (req, res) => {
 
     var options = {
       country: (country && /^[A-Za-z]{2}$/.test(country)) ? country.toUpperCase() : 'US',
-      sort: ['price_asc', 'price_desc', 'rating'].includes(sort) ? sort : 'price_asc',
+      sort: ['relevance', 'price_asc', 'price_desc', 'rating'].includes(sort) ? sort : 'relevance',
       limit: (limit && !isNaN(limit) && limit > 0 && limit <= 100) ? parseInt(limit) : 50
     };
 

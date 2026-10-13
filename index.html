@@ -375,6 +375,7 @@
   <div class="filter-sticky" id="searchSticky">
     <div class="filter-bar">
       <select id="sortSelect">
+        <option value="relevance">Relevance</option>
         <option value="price_asc">Price: Low to High</option>
         <option value="price_desc">Price: High to Low</option>
         <option value="rating">Highest Rated</option>
@@ -455,6 +456,10 @@
     <div class="results-stats" id="stats"></div>
     <div id="adTop" style="display:none"><div class="ad-label">Advertisement</div><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="1234567890" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
     <div class="results-list" id="results"></div>
+    <div class="load-more-wrap" id="loadMoreWrap" style="display:none;text-align:center;padding:24px 16px">
+      <button class="load-more-btn" id="loadMoreBtn" onclick="loadMoreProducts()" style="padding:12px 36px;font-size:1rem;font-weight:700;color:#fff;background:var(--primary);border:none;border-radius:30px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.15);transition:all .2s">Load More <i class="fas fa-chevron-down" style="margin-left:6px"></i></button>
+      <p id="loadMoreText" style="font-size:.85rem;color:var(--muted);margin-top:10px"></p>
+    </div>
     <div id="adBottom" style="display:none"><div class="ad-label">Advertisement</div><div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="0987654321" data-ad-format="auto" data-full-width-responsive="true"></ins></div></div>
   </div>
 
@@ -549,10 +554,10 @@
     function showGuestFavorites(){
       var f=getGuestFavs();
       if(f.length===0){ alert('No favorites yet. Tap the heart on any product to save it!'); return; }
-      allSearchResults=f; currentSearchQuery='My Favorites'; activeStoreFilter=null;
+      allSearchResults=f; currentSearchQuery='My Favorites'; activeStoreFilter=null; visibleCount=ITEMS_PER_PAGE;
       document.getElementById('heroSection').style.display='none'; document.querySelector('.stats-grid').style.display='none';
       document.getElementById('categoriesSection').style.display='none';
-      renderProductList(f,'My Favorites'); initGalleries(); fetchAndShowViews();
+      renderVisible(); initGalleries(); fetchAndShowViews();
     }
 
     /* ========== RECENTLY VIEWED ========== */
@@ -614,7 +619,7 @@
       document.getElementById('heroSection').style.display='none'; document.querySelector('.stats-grid').style.display='none'; document.getElementById('categoriesSection').style.display='none'; document.getElementById('searchInput').value='Analyzing photo...';
       var rd=document.getElementById('results'); rd.innerHTML='<div class="loading"><i class="fas fa-camera fa-2x" style="color:var(--green)"></i><p style="margin-top:15px;font-weight:600">Analyzing your photo...</p><p style="font-size:.85rem;color:var(--muted);margin-top:6px">Identifying the product with Google Lens</p></div>'; document.getElementById('stats').innerHTML='';
       var sort=document.getElementById('sortSelect').value, country=document.getElementById('countrySelect').value;
-      fetch('/api/search/by-image?imageUrl='+encodeURIComponent(imageUrl)+'&sort='+sort+'&country='+country)
+      fetch('/api/search/by-image?imageUrl='+encodeURIComponent(imageUrl)+'&sort='+sort+'&country='+country+'&limit=60')
         .then(function(r){return r.json();})
         .then(function(data){ if(!data.success){ rd.innerHTML='<div class="error"><i class="fas fa-exclamation-circle fa-2x"></i><p style="margin-top:12px;font-weight:600">'+data.message+'</p></div>'; document.getElementById('searchInput').value=''; return; } document.getElementById('searchInput').value=data.query; displayResults(data.results,data.count,data.query); })
         .catch(function(err){ rd.innerHTML='<div class="error"><i class="fas fa-exclamation-circle fa-2x"></i><p>Photo search failed.</p></div>'; document.getElementById('searchInput').value=''; });
@@ -627,11 +632,11 @@
       document.getElementById('heroSection').style.display='none'; document.querySelector('.stats-grid').style.display='none';
       var sort=document.getElementById('sortSelect').value, minP=document.getElementById('minPrice').value, maxP=document.getElementById('maxPrice').value, country=document.getElementById('countrySelect').value;
       var rd=document.getElementById('results'); rd.innerHTML='<div class="loading"><i class="fas fa-spinner fa-spin fa-2x"></i><p style="margin-top:15px">Searching...</p></div>'; document.getElementById('stats').innerHTML='';
-      var url='/api/search?q='+encodeURIComponent(q)+'&sort='+sort+'&country='+country; if(minP)url+='&minPrice='+minP; if(maxP)url+='&maxPrice='+maxP;
+      var url='/api/search?q='+encodeURIComponent(q)+'&sort='+sort+'&country='+country+'&limit=60'; if(minP)url+='&minPrice='+minP; if(maxP)url+='&maxPrice='+maxP;
       fetch(url).then(function(r){return r.json();}).then(function(data){
         if(!data.success){ rd.innerHTML='<div class="error"><i class="fas fa-exclamation-circle"></i><p>'+data.message+'</p></div>'; return; }
-        allSearchResults=data.results||[]; currentSearchQuery=q; activeStoreFilter=null;
-        renderProductList(allSearchResults,q); buildStoreFilters(allSearchResults); initGalleries(); fetchAndShowViews();
+        allSearchResults=data.results||[]; currentSearchQuery=q; activeStoreFilter=null; visibleCount=ITEMS_PER_PAGE;
+        renderVisible(); buildStoreFilters(allSearchResults); initGalleries(); fetchAndShowViews();
         document.getElementById('categoryCarousel').style.display='flex'; document.getElementById('carouselDots').style.display='flex';
       }).catch(function(err){ rd.innerHTML='<div class="error"><i class="fas fa-exclamation-circle"></i><p>Search failed.</p></div>'; });
     }
@@ -649,7 +654,7 @@
       {name:'AliExpress',keywords:['aliexpress']},{name:'Target',keywords:['target']},{name:'Best Buy',keywords:['best buy','bestbuy']},
       {name:'Etsy',keywords:['etsy']},{name:'Newegg',keywords:['newegg']},{name:'Groupon',keywords:['groupon']},{name:'Staples',keywords:['staples']},{name:'All Stores',keywords:[]}
     ];
-    var currentCategoryIndex=0, autoRotateInterval=null, allSearchResults=[], currentSearchQuery='', activeStoreFilter=null;
+    var currentCategoryIndex=0, autoRotateInterval=null, allSearchResults=[], currentSearchQuery='', activeStoreFilter=null, visibleCount=24, ITEMS_PER_PAGE=24, currentResultTotal=0;
 
     function buildCarouselDots(){ var c=''; for(var i=0;i<TRENDING_CATEGORIES.length;i++)c+='<div class="carousel-dot '+(i===currentCategoryIndex?'active':'')+'" onclick="jumpToCategory('+i+')"></div>'; document.getElementById('carouselDots').innerHTML=c; }
     function updateCategoryIndicator(){ var cat=TRENDING_CATEGORIES[currentCategoryIndex]; document.getElementById('indicatorText').textContent='Trending in '+cat.name; var dots=document.querySelectorAll('.carousel-dot'); for(var i=0;i<dots.length;i++)dots[i].classList.toggle('active',i===currentCategoryIndex); var chips=document.querySelectorAll('#categoryChips .category-chip'); for(var c=0;c<chips.length;c++)chips[c].classList.toggle('active',parseInt(chips[c].dataset.cat)===currentCategoryIndex); }
@@ -669,18 +674,42 @@
       document.getElementById('storeChips').innerHTML=html; document.getElementById('storeSection').style.display='block';
     }
     function filterByStore(storeName){
-      activeStoreFilter=storeName; var filtered=[];
-      if(storeName===null){filtered=allSearchResults;}else{
-        var plat=null; for(var p=0;p<PLATFORMS.length;p++)if(PLATFORMS[p].name===storeName){plat=PLATFORMS[p];break;}
-        if(!plat){filtered=allSearchResults;}else{ for(var i=0;i<allSearchResults.length;i++){ var src=(allSearchResults[i].source||'').toLowerCase(); var m=false; for(var k=0;k<plat.keywords.length;k++)if(src.includes(plat.keywords[k])){m=true;break;} if(m)filtered.push(allSearchResults[i]); } }
+      activeStoreFilter=storeName; visibleCount=ITEMS_PER_PAGE;
+      renderVisible(); buildStoreFilters(allSearchResults); initGalleries(); fetchAndShowViews();
+    }
+
+    /* ========== PAGINATION ========== */
+    function renderVisible(){
+      var products=allSearchResults;
+      if(activeStoreFilter!==null){
+        products=[]; var plat=null;
+        for(var p=0;p<PLATFORMS.length;p++)if(PLATFORMS[p].name===activeStoreFilter){plat=PLATFORMS[p];break;}
+        if(plat){ for(var i=0;i<allSearchResults.length;i++){ var src=(allSearchResults[i].source||'').toLowerCase(); var m=false; for(var k=0;k<plat.keywords.length;k++)if(src.includes(plat.keywords[k])){m=true;break;} if(m)products.push(allSearchResults[i]); } }
+        else { products=allSearchResults; }
       }
-      buildStoreFilters(allSearchResults); renderProductList(filtered,currentSearchQuery); initGalleries(); fetchAndShowViews();
+      currentResultTotal=products.length;
+      var toShow=products.slice(0,visibleCount);
+      renderProductList(toShow,currentSearchQuery);
+      updateLoadMoreButton(products.length);
+    }
+    function loadMoreProducts(){
+      visibleCount+=ITEMS_PER_PAGE;
+      renderVisible();
+      document.getElementById('loadMoreBtn').innerHTML='<i class="fas fa-spinner fa-spin"></i> Loading...';
+      setTimeout(function(){ document.getElementById('loadMoreBtn').innerHTML='Load More <i class="fas fa-chevron-down" style="margin-left:6px"></i>'; },300);
+    }
+    function updateLoadMoreButton(total){
+      var wrap=document.getElementById('loadMoreWrap');
+      var btn=document.getElementById('loadMoreBtn');
+      var txt=document.getElementById('loadMoreText');
+      if(total>visibleCount){ wrap.style.display='block'; txt.textContent='Showing '+visibleCount+' of '+total+' results'; }
+      else { wrap.style.display='none'; }
     }
 
     /* ========== RENDER PRODUCTS ========== */
     function renderProductList(products,query){
       var rd=document.getElementById('results');
-      document.getElementById('stats').innerHTML='Found <strong style="color:var(--green)">'+products.length+'</strong> results for "'+query+'"';
+      document.getElementById('stats').innerHTML='Found <strong style="color:var(--green)">'+currentResultTotal+'</strong> results for "'+query+'"';
       document.getElementById('adTop').style.display='block'; document.getElementById('adBottom').style.display='block';
       if(!products||products.length===0){ rd.innerHTML='<div class="no-results"><i class="fas fa-search fa-2x" style="color:var(--border);margin-bottom:15px"></i><p>No products found.</p></div>'; return; }
 
@@ -819,7 +848,7 @@
     }
 
     /* ========== DISPLAY RESULTS ========== */
-    function displayResults(products,count,query){ allSearchResults=products||[]; currentSearchQuery=query; activeStoreFilter=null; renderProductList(allSearchResults,query); buildStoreFilters(allSearchResults); initGalleries(); fetchAndShowViews(); }
+    function displayResults(products,count,query){ allSearchResults=products||[]; currentSearchQuery=query; activeStoreFilter=null; visibleCount=ITEMS_PER_PAGE; renderVisible(); buildStoreFilters(allSearchResults); initGalleries(); fetchAndShowViews(); }
 
     /* ========== INIT ========== */
     window.addEventListener('DOMContentLoaded',function(){

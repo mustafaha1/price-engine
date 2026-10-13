@@ -13,7 +13,7 @@ function getCacheKey(query, options) {
     s: options.sort || 'relevance',
     min: options.minPrice || '',
     max: options.maxPrice || '',
-    l: options.limit || 50
+    l: options.limit || 60
   });
 }
 
@@ -49,7 +49,7 @@ const SUPPORTED_COUNTRIES = {
 async function search(query, options) {
   try {
     var countryConfig = SUPPORTED_COUNTRIES[options.country] || SUPPORTED_COUNTRIES['US'];
-    var limit = options.limit || 50;
+    var limit = options.limit || 60;
     var cacheKey = getCacheKey(query, options);
 
     // Check cache first (saves SerpAPI credits!)
@@ -90,6 +90,7 @@ async function search(query, options) {
     } else if (options.sort === 'rating') {
       products.sort((a, b) => (b.rating || 0) - (a.rating || 0));
     }
+    // 'relevance' sort keeps original API order (no sorting)
 
     var result = products.slice(0, limit);
 
@@ -113,7 +114,7 @@ async function searchGoogleShopping(query, countryConfig, options, limit) {
     api_key: process.env.SERPAPI_KEY,
     gl: countryConfig.gl,
     hl: countryConfig.hl,
-    num: Math.min(limit, 40)
+    num: Math.min(limit, 60)
   };
 
   if (options.minPrice !== undefined) params.min_price = options.minPrice;
@@ -187,7 +188,7 @@ async function searchEbay(query, countryConfig, options, limit) {
 
   try {
     var ebayGlobalId = countryConfig.ebay || 'EBAY_US';
-    var entriesPerPage = Math.min(limit, 20);
+    var entriesPerPage = Math.min(limit, 30);
 
     var url = 'https://svcs.ebay.com/services/search/FindingService/v1?' +
       'OPERATION-NAME=findItemsByKeywords' +
