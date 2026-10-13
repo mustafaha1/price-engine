@@ -71,21 +71,33 @@ async function search(query, options) {
 
     // Add Google Shopping results
     if (googleResults.status === 'fulfilled' && googleResults.value) {
+      console.log('[SEARCH] Google Shopping returned', googleResults.value.length, 'results');
       products = products.concat(googleResults.value);
+    } else if (googleResults.status === 'rejected') {
+      console.error('[SEARCH] Google Shopping failed:', googleResults.reason.message);
     }
 
     // Add eBay results
     if (ebayResults.status === 'fulfilled' && ebayResults.value) {
+      console.log('[SEARCH] eBay API returned', ebayResults.value.length, 'results');
       products = products.concat(ebayResults.value);
+    } else if (ebayResults.status === 'rejected') {
+      console.error('[SEARCH] eBay API failed:', ebayResults.reason.message);
+    } else {
+      console.log('[SEARCH] eBay API returned 0 results (EBAY_APP_ID may not be set)');
     }
 
     // Add AliExpress results
     if (aliResults.status === 'fulfilled' && aliResults.value) {
+      console.log('[SEARCH] AliExpress API returned', aliResults.value.length, 'results');
       products = products.concat(aliResults.value);
+    } else if (aliResults.status === 'rejected') {
+      console.error('[SEARCH] AliExpress API failed:', aliResults.reason.message);
     }
 
-    // If both failed, return demo results
+    // If all failed, return demo results
     if (products.length === 0) {
+      console.log('[SEARCH] All sources failed — returning demo results');
       return generateDemoResults(query, options);
     }
 
@@ -142,11 +154,40 @@ async function searchGoogleShopping(query, countryConfig, options, limit) {
   }
 
   return response.shopping_results
-    .filter(item => item.link || item.product_link)
+    .filter(item => item.link || item.product_link || item.direct_link)
     .map((item, index) => {
-      var url = item.link || item.product_link || '#';
-      if (url && !url.startsWith('http')) {
-        url = 'https://www.google.com/search?q=' + encodeURIComponent(item.title);
+      // Try to get direct merchant URL first, fall back to Google redirect
+      var rawUrl = item.direct_link || item.product_link || item.link || '#';
+      var url = extractDirectUrl(rawUrl);
+
+      // Detect source from item.source or URL
+      var detectedSource = (item.source || '').toLowerCase();
+      var isGoogleUrl = url.includes('google.com/search') || url.includes('google.com/shopping');
+
+      // If Google gives us a knowledge panel URL (not a direct merchant link),
+      // build a direct merchant search URL with affiliate tag instead
+      if (isGoogleUrl || url === '#' || !url.startsWith('http')) {
+        var searchQuery = encodeURIComponent(item.title || query);
+
+        if (detectedSource.includes('amazon')) {
+          // Direct Amazon search with affiliate tag
+          var amazonDomain = 'amazon.com';
+          if (countryConfig.gl === 'GB') amazonDomain = 'amazon.co.uk';
+          else if (countryConfig.gl === 'DE') amazonDomain = 'amazon.de';
+          else if (countryConfig.gl === 'FR') amazonDomain = 'amazon.fr';
+          else if (countryConfig.gl === 'CA') amazonDomain = 'amazon.ca';
+          else if (countryConfig.gl === 'AU') amazonDomain = 'amazon.com.au';
+          url = 'https://www.' + amazonDomain + '/s?k=' + searchQuery;
+        } else if (detectedSource.includes('walmart')) {
+          url = 'https://www.walmart.com/search?q=' + searchQuery;
+        } else if (detectedSource.includes('best buy')) {
+          url = 'https://www.bestbuy.com/site/searchpage.jsp?st=' + searchQuery;
+        } else if (detectedSource.includes('target')) {
+          url = 'https://www.target.com/s?searchTerm=' + searchQuery;
+        } else {
+          // Unknown source — keep Google search as fallback
+          url = 'https://www.google.com/search?q=' + searchQuery;
+        }
       }
 
       var thumbnail = item.thumbnail || item.image || null;
@@ -273,6 +314,42 @@ async function searchEbay(query, countryConfig, options, limit) {
   } catch (error) {
     console.error('eBay search error:', error.message);
     return [];
+  }
+}
+
+/* ========== URL HELPERS ========== */
+// Google Shopping returns google.com redirect URLs — extract the real merchant URL
+function extractDirectUrl(googleUrl) {
+  if (!googleUrl || googleUrl === '#') return '#';
+
+  try {
+    // Pattern 1: google.com/aclk?...&adurl=https://real-site.com/...
+    var adurlMatch = googleUrl.match(/[?&]adurl=([^&]+)/i);
+    if (adurlMatch) {
+      return decodeURIComponent(adurlMatch[1]);
+    }
+
+    // Pattern 2: google.com/url?...&url=https://real-site.com/...
+    var urlMatch = googleUrl.match(/[?&]url=([^&]+)/i);
+    if (urlMatch) {
+      return decodeURIComponent(urlMatch[1]);
+    }
+
+    // Pattern 3: google.com/shopping/product/... with merchant link
+    var merchantMatch = googleUrl.match(/[?&]merchant_link=([^&]+)/i);
+    if (merchantMatch) {
+      return decodeURIComponent(merchantMatch[1]);
+    }
+
+    // If it's already a direct link (not google.com), return as-is
+    if (!googleUrl.includes('google.com')) {
+      return googleUrl;
+    }
+
+    // Google knowledge panel URLs can't be decoded — return as-is
+    return googleUrl;
+  } catch (e) {
+    return googleUrl;
   }
 }
 
