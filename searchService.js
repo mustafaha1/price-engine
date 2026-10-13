@@ -177,6 +177,19 @@ async function searchGoogleShopping(query, countryConfig, options, limit) {
         url = url.replace('ebay.com', 'ebay.com.au');
       }
 
+      // Map Amazon domains to correct regional domain for UK users
+      if (url.includes('amazon.com') && !url.includes('amazon.co.uk') && countryConfig.gl === 'GB') {
+        url = url.replace('amazon.com', 'amazon.co.uk');
+      } else if (url.includes('amazon.com') && !url.includes('amazon.de') && countryConfig.gl === 'DE') {
+        url = url.replace('amazon.com', 'amazon.de');
+      } else if (url.includes('amazon.com') && !url.includes('amazon.fr') && countryConfig.gl === 'FR') {
+        url = url.replace('amazon.com', 'amazon.fr');
+      } else if (url.includes('amazon.com') && !url.includes('amazon.ca') && countryConfig.gl === 'CA') {
+        url = url.replace('amazon.com', 'amazon.ca');
+      } else if (url.includes('amazon.com') && !url.includes('amazon.com.au') && countryConfig.gl === 'AU') {
+        url = url.replace('amazon.com', 'amazon.com.au');
+      }
+
       // If Google gives us a knowledge panel URL (not a direct merchant link),
       // build a direct merchant search URL with affiliate tag instead
       if (isGoogleUrl || url === '#' || !url.startsWith('http')) {
