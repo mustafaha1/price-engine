@@ -165,29 +165,31 @@ async function searchGoogleShopping(query, countryConfig, options, limit) {
       var isGoogleUrl = url.includes('google.com/search') || url.includes('google.com/shopping');
 
       // Map eBay domains to correct regional domain (prevents eBay redirect kick-out)
-      if (url.includes('ebay.com') && !url.includes('ebay.co.uk') && countryConfig.gl === 'GB') {
-        url = url.replace('ebay.com', 'ebay.co.uk');
-      } else if (url.includes('ebay.com') && !url.includes('ebay.de') && countryConfig.gl === 'DE') {
-        url = url.replace('ebay.com', 'ebay.de');
-      } else if (url.includes('ebay.com') && !url.includes('ebay.fr') && countryConfig.gl === 'FR') {
-        url = url.replace('ebay.com', 'ebay.fr');
-      } else if (url.includes('ebay.com') && !url.includes('ebay.ca') && countryConfig.gl === 'CA') {
-        url = url.replace('ebay.com', 'ebay.ca');
-      } else if (url.includes('ebay.com') && !url.includes('ebay.com.au') && countryConfig.gl === 'AU') {
-        url = url.replace('ebay.com', 'ebay.com.au');
+      var ebayDomainMap = {
+        'uk': 'ebay.co.uk', 'de': 'ebay.de', 'fr': 'ebay.fr',
+        'ca': 'ebay.ca', 'au': 'ebay.com.au', 'it': 'ebay.it',
+        'es': 'ebay.es', 'nl': 'ebay.nl', 'br': 'ebay.com.br',
+        'in': 'ebay.in', 'jp': 'ebay.co.jp'
+      };
+      if (url.includes('ebay.com') && ebayDomainMap[countryConfig.gl]) {
+        var targetEbay = ebayDomainMap[countryConfig.gl];
+        if (!url.includes(targetEbay)) {
+          url = url.replace('ebay.com', targetEbay);
+        }
       }
 
-      // Map Amazon domains to correct regional domain for UK users
-      if (url.includes('amazon.com') && !url.includes('amazon.co.uk') && countryConfig.gl === 'GB') {
-        url = url.replace('amazon.com', 'amazon.co.uk');
-      } else if (url.includes('amazon.com') && !url.includes('amazon.de') && countryConfig.gl === 'DE') {
-        url = url.replace('amazon.com', 'amazon.de');
-      } else if (url.includes('amazon.com') && !url.includes('amazon.fr') && countryConfig.gl === 'FR') {
-        url = url.replace('amazon.com', 'amazon.fr');
-      } else if (url.includes('amazon.com') && !url.includes('amazon.ca') && countryConfig.gl === 'CA') {
-        url = url.replace('amazon.com', 'amazon.ca');
-      } else if (url.includes('amazon.com') && !url.includes('amazon.com.au') && countryConfig.gl === 'AU') {
-        url = url.replace('amazon.com', 'amazon.com.au');
+      // Map Amazon domains to correct regional domain
+      var amazonDomainMap = {
+        'uk': 'amazon.co.uk', 'de': 'amazon.de', 'fr': 'amazon.fr',
+        'ca': 'amazon.ca', 'au': 'amazon.com.au', 'it': 'amazon.it',
+        'es': 'amazon.es', 'nl': 'amazon.nl', 'br': 'amazon.com.br',
+        'in': 'amazon.in', 'jp': 'amazon.co.jp'
+      };
+      if (url.includes('amazon.com') && amazonDomainMap[countryConfig.gl]) {
+        var targetAmazon = amazonDomainMap[countryConfig.gl];
+        if (!url.includes(targetAmazon)) {
+          url = url.replace('amazon.com', targetAmazon);
+        }
       }
 
       // If Google gives us a knowledge panel URL (not a direct merchant link),
@@ -197,12 +199,7 @@ async function searchGoogleShopping(query, countryConfig, options, limit) {
 
         if (detectedSource.includes('amazon')) {
           // Direct Amazon search with affiliate tag
-          var amazonDomain = 'amazon.com';
-          if (countryConfig.gl === 'GB') amazonDomain = 'amazon.co.uk';
-          else if (countryConfig.gl === 'DE') amazonDomain = 'amazon.de';
-          else if (countryConfig.gl === 'FR') amazonDomain = 'amazon.fr';
-          else if (countryConfig.gl === 'CA') amazonDomain = 'amazon.ca';
-          else if (countryConfig.gl === 'AU') amazonDomain = 'amazon.com.au';
+          var amazonDomain = amazonDomainMap[countryConfig.gl] || 'amazon.com';
           url = 'https://www.' + amazonDomain + '/s?k=' + searchQuery;
         } else if (detectedSource.includes('walmart')) {
           url = 'https://www.walmart.com/search?q=' + searchQuery;
@@ -212,11 +209,7 @@ async function searchGoogleShopping(query, countryConfig, options, limit) {
           url = 'https://www.target.com/s?searchTerm=' + searchQuery;
         } else if (detectedSource.includes('ebay')) {
           // Direct eBay search (campid only works on item pages, not search pages)
-          var ebayDomain = 'ebay.com';
-          if (countryConfig.gl === 'GB') ebayDomain = 'ebay.co.uk';
-          else if (countryConfig.gl === 'DE') ebayDomain = 'ebay.de';
-          else if (countryConfig.gl === 'CA') ebayDomain = 'ebay.ca';
-          else if (countryConfig.gl === 'AU') ebayDomain = 'ebay.com.au';
+          var ebayDomain = ebayDomainMap[countryConfig.gl] || 'ebay.com';
           url = 'https://www.' + ebayDomain + '/sch/i.html?_nkw=' + searchQuery;
         } else {
           // Unknown source — keep Google search as fallback
@@ -512,8 +505,25 @@ async function searchAliExpress(query, options, limit) {
 
 function parsePrice(priceStr) {
   if (!priceStr) return null;
-  var match = priceStr.toString().replace(/,/g, '').match(/[\d.]+/);
-  return match ? parseFloat(match[0]) : null;
+  var str = priceStr.toString().trim();
+
+  // European format: "177,00", "EUR 177,00", "1.234,56"
+  // Comma followed by exactly 2 digits at end = decimal comma
+  var euroMatch = str.match(/([\d.]+),(\d{2})\s*$/);
+  if (euroMatch) {
+    var whole = euroMatch[1].replace(/\./g, ''); // Remove dot thousands separators
+    return parseFloat(whole + '.' + euroMatch[2]);
+  }
+
+  // US format: "1,234.56", "1234.56", "177.00"
+  var usMatch = str.match(/[\d,]+\.\d{2}|[\d,]+/);
+  if (usMatch) {
+    return parseFloat(usMatch[0].replace(/,/g, ''));
+  }
+
+  // Fallback
+  var fallback = str.match(/[\d.]+/);
+  return fallback ? parseFloat(fallback[0]) : null;
 }
 
 function extractCurrency(priceStr) {

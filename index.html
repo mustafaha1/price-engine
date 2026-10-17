@@ -548,6 +548,11 @@
 
     function getRedirectUrl(url){ if(!url||url==='#')return'#'; return url; }
 
+    function getCurrencySymbol(currencyCode){
+      var map={'USD':'$','EUR':'€','GBP':'£','JPY':'¥','CAD':'CA$','AUD':'A$','INR':'₹','BRL':'R$'};
+      return map[currencyCode]||map[(currencyCode||'').toUpperCase()]||(currencyCode||'$');
+    }
+
     /* ========== DARK MODE ========== */
     function toggleDarkMode(){
       document.body.classList.toggle('dark');
@@ -610,7 +615,7 @@
       sec.style.display='block';
       var html='';
       for(var i=0;i<rv.length;i++){
-        var r=rv[i]; var cur=r.currency==='USD'?'$':(r.currency||'$'); var red=getRedirectUrl(r.url);
+        var r=rv[i]; var cur=getCurrencySymbol(r.currency); var red=getRedirectUrl(r.url);
         html+='<div class="rv-card" onclick="history.replaceState({},\'PriceEngine\',location.href);window.location.href=\''+red+'\'">'+
           '<img src="'+(r.image||NO_IMAGE)+'" onerror="this.src=\''+NO_IMAGE+'\'">'+
           '<div class="rv-info"><div class="rv-price">'+cur+' '+r.price.toFixed(2)+'</div><div class="rv-name">'+r.title+'</div></div></div>';
@@ -754,7 +759,7 @@
       var html='', adCount=0;
       for(var i=0;i<products.length;i++){
         if(i>0&&i%4===0){ adCount++; html+='<div class="ad-label">Advertisement</div><div class="ad-container" id="inlineAd'+adCount+'"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="5555555555" data-ad-format="auto" data-full-width-responsive="true"></ins></div>'; }
-        var p=products[i]; var price=p.price||0; var currency=p.currency==='USD'?'$':(p.currency||'$'); var originalPrice=price>0?(price*1.35).toFixed(2):'0.00'; var saveAmount=price>0?(originalPrice-price).toFixed(2):'0.00';
+        var p=products[i]; var price=p.price||0; var currency=getCurrencySymbol(p.currency); var originalPrice=price>0?(price*1.35).toFixed(2):'0.00'; var saveAmount=price>0?(originalPrice-price).toFixed(2):'0.00';
         var priceDisplay=currency+' '+price.toFixed(2), originalDisplay=currency+' '+originalPrice;
         var saveBadge=price>0?'<div class="price-save-row"><span class="price-save">Save '+currency+' '+saveAmount+'</span></div>':'';
         var images=p.images&&p.images.length>0?p.images:[p.image||NO_IMAGE];
@@ -839,7 +844,7 @@
       html+='</tr></thead><tbody>';
       html+='<tr><td>Image</td>'; for(var i=0;i<compareList.length;i++)html+='<td><img src="'+(compareList[i].image||NO_IMAGE)+'"></td>'; html+='</tr>';
       html+='<tr><td>Title</td>'; for(var i=0;i<compareList.length;i++)html+='<td>'+compareList[i].title+'</td>'; html+='</tr>';
-      html+='<tr><td>Price</td>'; for(var i=0;i<compareList.length;i++){ var cur=compareList[i].currency==='USD'?'$':(compareList[i].currency||'$'); html+='<td class="c-price">'+cur+' '+compareList[i].price.toFixed(2)+'</td>'; } html+='</tr>';
+      html+='<tr><td>Price</td>'; for(var i=0;i<compareList.length;i++){ var cur=getCurrencySymbol(compareList[i].currency); html+='<td class="c-price">'+cur+' '+compareList[i].price.toFixed(2)+'</td>'; } html+='</tr>';
       html+='<tr><td>Store</td>'; for(var i=0;i<compareList.length;i++)html+='<td>'+compareList[i].source+'</td>'; html+='</tr>';
       html+='<tr><td>Link</td>'; for(var i=0;i<compareList.length;i++)html+='<td><a href="'+getRedirectUrl(compareList[i].url)+'" target="_blank" class="c-link">Buy Now</a></td>'; html+='</tr>';
       html+='</tbody></table>';
