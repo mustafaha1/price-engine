@@ -504,26 +504,30 @@ async function searchAliExpress(query, options, limit) {
 }
 
 function parsePrice(priceStr) {
-  if (!priceStr) return null;
+  if (!priceStr && priceStr !== 0) return null;
   var str = priceStr.toString().trim();
 
-  // European format: "177,00", "EUR 177,00", "1.234,56"
-  // Comma followed by exactly 2 digits at end = decimal comma
-  var euroMatch = str.match(/([\d.]+),(\d{2})\s*$/);
+  // European format: "177,00", "EUR 177,00", "1.234,56", "177,00 €"
+  // Comma + exactly 2 digits, followed by non-digit (or end of string)
+  var euroMatch = str.match(/([\d.]+),(\d{2})(?!\d)/);
   if (euroMatch) {
     var whole = euroMatch[1].replace(/\./g, ''); // Remove dot thousands separators
     return parseFloat(whole + '.' + euroMatch[2]);
   }
 
-  // US format: "1,234.56", "1234.56", "177.00"
-  var usMatch = str.match(/[\d,]+\.\d{2}|[\d,]+/);
+  // US format: "1,234.56", "$1234.56", "177.00"
+  var usMatch = str.match(/[\d,]+\.\d{2}(?!\d)/);
   if (usMatch) {
     return parseFloat(usMatch[0].replace(/,/g, ''));
   }
 
-  // Fallback
-  var fallback = str.match(/[\d.]+/);
-  return fallback ? parseFloat(fallback[0]) : null;
+  // Plain integer or number without decimals
+  var simpleMatch = str.match(/[\d,]+(?!\d)/);
+  if (simpleMatch) {
+    return parseFloat(simpleMatch[0].replace(/,/g, ''));
+  }
+
+  return null;
 }
 
 function extractCurrency(priceStr) {
