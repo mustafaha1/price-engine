@@ -185,7 +185,7 @@
     .product-fav-btn.saved { background:var(--green); color:#fff; border-color:var(--green); }
     .product-info { padding:12px; }
     .product-source { display:inline-block; color:var(--green); font-size:.65rem; font-weight:800; text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; }
-    .product-title { font-size:.95rem; font-weight:600; color:var(--text); line-height:1.35; margin-bottom:8px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; height:2.6em; overflow-wrap:break-word; word-break:break-word; }
+    .product-title { font-size:.95rem; font-weight:600; color:var(--text); line-height:1.35; margin-bottom:8px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; height:2.6em; overflow-wrap:break-word; word-break:break-word; text-decoration:none; }
     .price-row { display:flex; align-items:baseline; gap:8px; margin-bottom:4px; flex-wrap:wrap; }
     .price-current { font-size:1.25rem; font-weight:800; color:var(--text); }
     .price-original { font-size:.85rem; color:var(--muted); text-decoration:line-through; }
@@ -208,6 +208,11 @@
     .btn-buy.disabled { background:#c7c7cc; cursor:not-allowed; }
 
     .product-card-link { display:block; text-decoration:none; color:inherit; cursor:pointer; }
+    a.product-title:hover { color:var(--green); }
+    a.image-gallery-link { display:flex; width:100%; height:100%; text-decoration:none; color:inherit; outline:none; }
+    a.btn-buy { display:block; width:100%; padding:12px; background:var(--green); color:#fff; text-align:center; border-radius:10px; text-decoration:none; font-weight:700; font-size:.95rem; border:none; cursor:pointer; transition:background .2s,transform .1s; box-sizing:border-box; }
+    a.btn-buy:hover { background:var(--green-dark); }
+    a.btn-buy:active { transform:scale(.98); }
 
     /* Compare checkbox */
     .compare-wrap { display:flex; align-items:center; gap:6px; margin-bottom:8px; padding:6px 8px; background:var(--bg); border-radius:8px; }
@@ -328,7 +333,7 @@
       .product-image-wrap { aspect-ratio:1; border-radius:10px 10px 0 0; }
       .product-info { padding:8px; }
       .product-source { font-size:.6rem; margin-bottom:4px; }
-      .product-title { font-size:.8rem; -webkit-line-clamp:2; height:auto; line-height:1.3; margin-bottom:4px; overflow-wrap:break-word; word-break:break-word; }
+      .product-title { font-size:.8rem; -webkit-line-clamp:2; height:auto; line-height:1.3; margin-bottom:4px; overflow-wrap:break-word; word-break:break-word; text-decoration:none; }
       .price-row { gap:4px; margin-bottom:2px; }
       .price-current { font-size:1rem; }
       .price-original { font-size:.75rem; }
@@ -345,8 +350,8 @@
       /* Move fav to top-right like Amazon */
       .product-fav-btn { top:6px; right:6px; bottom:auto; width:28px; height:28px; font-size:.8rem; }
       /* Amazon-style yellow buy button on mobile */
-      .btn-buy { padding:10px; font-size:.9rem; border-radius:20px; background:#ffd814; color:#0f1111; }
-      .btn-buy:hover { background:#f7ca00; }
+      a.btn-buy { padding:10px; font-size:.9rem; border-radius:20px; background:#ffd814; color:#0f1111; display:block; width:100%; text-align:center; text-decoration:none; font-weight:700; border:none; cursor:pointer; box-sizing:border-box; }
+      a.btn-buy:hover { background:#f7ca00; }
     }
     @media(max-width:480px){
       .main-content { padding-top:135px; }
@@ -781,17 +786,17 @@
         var productJson=JSON.stringify({id:p.id,title:title,price:price,currency:p.currency||'USD',image:p.image||NO_IMAGE,url:url,source:source}).replace(/"/g,'&quot;');
 
         var redirectUrl=getRedirectUrl(url);
-        html+='<div class="product-card-link" id="'+cardId+'" data-url="'+url+'" data-redirect="'+redirectUrl+'" data-title="'+title.replace(/"/g,'&quot;')+'" data-source="'+source+'" onclick="trackProductClick(this);addRecentlyViewed('+productJson+');history.replaceState({},\'PriceEngine\',location.href);window.location.href=\''+redirectUrl+'\'">'+
+        html+='<div class="product-card-link" id="'+cardId+'" data-url="'+url+'" data-redirect="'+redirectUrl+'" data-title="'+title.replace(/"/g,'&quot;')+'" data-source="'+source+'" onclick="trackProductClick(this);addRecentlyViewed('+productJson+');window.open(\''+redirectUrl+'\',\'_blank\')">'+
           '<div class="product-card">'+
             '<div class="product-image-wrap" data-images="'+images.length+'">'+
               '<div class="view-badge pulse" id="badge_'+cardId+'"><i class="fas fa-fire"></i> <span class="view-count">0</span> viewing</div>'+
               '<div class="badges-row">'+dealBadge+stockBadge+'</div>'+
-              '<div class="image-gallery" id="gallery_'+cardId+'">'+gallerySlides+'</div>'+arrows+(galleryDots?'<div class="gallery-dots">'+galleryDots+'</div>':'')+
+              '<a href="'+redirectUrl+'" target="_blank" class="image-gallery image-gallery-link" onclick="event.stopPropagation();trackProductClick(document.getElementById(\''+cardId+'\'));addRecentlyViewed('+productJson+');" id="gallery_'+cardId+'">'+gallerySlides+'</a>'+arrows+(galleryDots?'<div class="gallery-dots" onclick="event.stopPropagation()">'+galleryDots+'</div>':'')+
               '<button class="product-fav-btn '+(isFav?'saved':'')+'" onclick="event.stopPropagation();toggleGuestFav(this,'+productJson+')">'+(isFav?'<i class="fas fa-heart"></i>':'<i class="far fa-heart"></i>')+'</button>'+
             '</div>'+
             '<div class="product-info">'+
               '<div class="product-source">'+source+'</div>'+
-              '<div class="product-title">'+title+'</div>'+
+              '<a href="'+redirectUrl+'" target="_blank" class="product-title" onclick="event.stopPropagation();trackProductClick(document.getElementById(\''+cardId+'\'));addRecentlyViewed('+productJson+');">'+title+'</a>'+
               '<div class="price-row"><span class="price-current">'+priceDisplay+'</span><span class="price-original">'+originalDisplay+'</span></div>'+
               saveBadge+ratingRow+
               '<div class="compare-wrap" onclick="event.stopPropagation()"><input type="checkbox" id="cmp_'+cardId+'" onchange="toggleCompare('+productJson+',this.checked)"><label for="cmp_'+cardId+'">Compare</label></div>'+
@@ -800,7 +805,7 @@
                 '<button class="action-btn" onclick="event.stopPropagation();openPriceAlert(\''+title.replace(/'/g,"\\'")+'\','+price+',\''+url+'\')"><i class="fas fa-bell"></i> Alert</button>'+
                 '<button class="action-btn copy" onclick="event.stopPropagation();copyProductLink(\''+url+'\')"><i class="fas fa-link"></i> Copy</button>'+
               '</div>'+
-              '<div class="btn-buy">Buy Now <i class="fas fa-external-link-alt" style="font-size:.8rem;margin-left:6px;opacity:.7"></i></div>'+
+              '<a href="'+redirectUrl+'" target="_blank" class="btn-buy" onclick="event.stopPropagation();trackProductClick(document.getElementById(\''+cardId+'\'));addRecentlyViewed('+productJson+');">Buy Now <i class="fas fa-external-link-alt" style="font-size:.8rem;margin-left:6px;opacity:.7"></i></a>'+
             '</div>'+
           '</div>'+
         '</div>';
