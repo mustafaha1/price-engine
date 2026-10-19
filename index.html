@@ -932,10 +932,10 @@
       setTimeout(function(){ toast.style.opacity='0'; toast.style.transition='opacity .5s'; setTimeout(function(){toast.remove();},500); }, 3500);
     }
 
-    function detectUserLocation() {
+    function detectUserLocation(callback) {
       // Check if user already manually selected a country
       var saved = localStorage.getItem('pe_country_manual');
-      if (saved) { setPricePlaceholders(); return; }
+      if (saved) { setPricePlaceholders(); if(callback) callback(); return; }
 
       // Try to get from previous auto-detection
       var autoCountry = localStorage.getItem('pe_country_auto');
@@ -945,6 +945,7 @@
           if(sel.options[i].value===autoCountry){ sel.value=autoCountry; break; }
         }
         setPricePlaceholders();
+        if(callback) callback();
         return;
       }
 
@@ -962,61 +963,53 @@
           var sym = CURRENCY_SYMBOLS[mapped] || '$';
           var countryNames = {'US':'United States','UK':'United Kingdom','CA':'Canada','AU':'Australia','DE':'Germany','FR':'France','IT':'Italy','ES':'Spain','NL':'Netherlands','BR':'Brazil','IN':'India','JP':'Japan'};
           showGeoToast('Showing prices in ' + sym + ' for ' + (countryNames[mapped]||mapped));
-          var q = document.getElementById('searchInput').value.trim();
-          if(q) doSearch();
           return true;
         }
         return false;
       }
 
-      // Helper: detect from browser language (reliable fallback)
-      function detectFromLanguage() {
-        var lang = (navigator.language || navigator.userLanguage || 'en-US').toUpperCase();
-        var langMap = {
-          'EN-GB':'UK','EN-US':'US','EN-CA':'CA','EN-AU':'AU','EN-IE':'UK','EN-NZ':'AU',
-          'DE-DE':'DE','DE-AT':'DE','DE-CH':'DE',
-          'FR-FR':'FR','FR-CA':'CA','FR-BE':'FR','FR-CH':'FR',
-          'IT-IT':'IT','IT-CH':'IT',
-          'ES-ES':'ES','ES-MX':'US','ES-AR':'BR','ES-CO':'BR','ES-PE':'BR','ES-CL':'BR',
-          'NL-NL':'NL','NL-BE':'NL',
-          'PT-BR':'BR','PT-PT':'ES',
-          'JA-JP':'JP',
-          'HI-IN':'IN','BN-IN':'IN','TA-IN':'IN','TE-IN':'IN','MR-IN':'IN','GU-IN':'IN','KN-IN':'IN','ML-IN':'IN','PA-IN':'IN','UR-IN':'IN',
-          'SV-SE':'DE','NB-NO':'DE','DA-DK':'DE','FI-FI':'DE',
-          'PL-PL':'DE','CS-CZ':'DE','HU-HU':'DE','RO-RO':'DE','BG-BG':'DE','HR-HR':'DE','SK-SK':'DE','SL-SI':'DE','LT-LT':'DE','LV-LV':'DE','ET-EE':'DE',
-          'EL-GR':'DE','TR-TR':'DE',
-          'RU-RU':'DE','UK-UA':'DE',
-          'KO-KR':'JP','ZH-CN':'JP','ZH-TW':'JP','ZH-HK':'JP','TH-TH':'JP','VI-VN':'JP','MS-MY':'AU','ID-ID':'JP','TL-PH':'JP',
-          'AR-SA':'UK','AR-AE':'UK','AR-QA':'UK','AR-KW':'UK','AR-EG':'UK','HE-IL':'DE','FA-IR':'DE',
-          'ZU-ZA':'UK','AF-ZA':'UK','SW-KE':'UK','SW-TZ':'UK','RW-RW':'UK','HA-NG':'UK','YO-NG':'UK',
-          'UR-PK':'IN','BN-BD':'IN','SI-LK':'IN','NE-NP':'IN'
-        };
-        var mapped = langMap[lang];
-        if(!mapped && lang.indexOf('-')>-1){
-          var code = lang.split('-')[1];
-          mapped = GEO_COUNTRY_MAP[code];
-        }
-        return applyCountry(mapped, 'language');
+      // Detect from browser language (instant, no API call needed)
+      var lang = (navigator.language || navigator.userLanguage || 'en-US').toUpperCase();
+      var langMap = {
+        'EN-GB':'UK','EN-US':'US','EN-CA':'CA','EN-AU':'AU','EN-IE':'UK','EN-NZ':'AU',
+        'DE-DE':'DE','DE-AT':'DE','DE-CH':'DE',
+        'FR-FR':'FR','FR-CA':'CA','FR-BE':'FR','FR-CH':'FR',
+        'IT-IT':'IT','IT-CH':'IT',
+        'ES-ES':'ES','ES-MX':'US','ES-AR':'BR','ES-CO':'BR','ES-PE':'BR','ES-CL':'BR',
+        'NL-NL':'NL','NL-BE':'NL',
+        'PT-BR':'BR','PT-PT':'ES',
+        'JA-JP':'JP',
+        'HI-IN':'IN','BN-IN':'IN','TA-IN':'IN','TE-IN':'IN','MR-IN':'IN','GU-IN':'IN','KN-IN':'IN','ML-IN':'IN','PA-IN':'IN','UR-IN':'IN',
+        'SV-SE':'DE','NB-NO':'DE','DA-DK':'DE','FI-FI':'DE',
+        'PL-PL':'DE','CS-CZ':'DE','HU-HU':'DE','RO-RO':'DE','BG-BG':'DE','HR-HR':'DE','SK-SK':'DE','SL-SI':'DE','LT-LT':'DE','LV-LV':'DE','ET-EE':'DE',
+        'EL-GR':'DE','TR-TR':'DE',
+        'RU-RU':'DE','UK-UA':'DE',
+        'KO-KR':'JP','ZH-CN':'JP','ZH-TW':'JP','ZH-HK':'JP','TH-TH':'JP','VI-VN':'JP','MS-MY':'AU','ID-ID':'JP','TL-PH':'JP',
+        'AR-SA':'UK','AR-AE':'UK','AR-QA':'UK','AR-KW':'UK','AR-EG':'UK','HE-IL':'DE','FA-IR':'DE',
+        'ZU-ZA':'UK','AF-ZA':'UK','SW-KE':'UK','SW-TZ':'UK','RW-RW':'UK','HA-NG':'UK','YO-NG':'UK',
+        'UR-PK':'IN','BN-BD':'IN','SI-LK':'IN','NE-NP':'IN'
+      };
+      var mapped = langMap[lang];
+      if(!mapped && lang.indexOf('-')>-1){
+        mapped = GEO_COUNTRY_MAP[lang.split('-')[1]];
       }
-
-      // Try IP geolocation first, fallback to browser language
-      fetch('https://ipapi.co/json/')
-        .then(function(r){ return r.json(); })
-        .then(function(data){
-          if(data && data.country_code){
-            var mapped = GEO_COUNTRY_MAP[data.country_code];
-            if(applyCountry(mapped, 'ip')) return;
-          }
-          detectFromLanguage();
-        })
-        .catch(function(e){ detectFromLanguage(); });
+      applyCountry(mapped || 'US', 'language');
+      if(callback) callback();
     }
 
     /* ========== INIT ========== */
     window.addEventListener('DOMContentLoaded',function(){
-      detectUserLocation();
-      buildCarouselDots(); document.getElementById('categoryCarousel').style.display='flex'; document.getElementById('carouselDots').style.display='flex'; updateCategoryIndicator(); renderRecentlyViewed();
-      setTimeout(function(){ var cat=TRENDING_CATEGORIES[currentCategoryIndex]; document.getElementById('searchInput').value=cat.query; doSearch(); },500);
+      detectUserLocation(function(){
+        // Only start search AFTER country is detected
+        buildCarouselDots(); 
+        document.getElementById('categoryCarousel').style.display='flex'; 
+        document.getElementById('carouselDots').style.display='flex'; 
+        updateCategoryIndicator(); 
+        renderRecentlyViewed();
+        var cat=TRENDING_CATEGORIES[currentCategoryIndex]; 
+        document.getElementById('searchInput').value=cat.query; 
+        doSearch();
+      });
     });
   </script>
   <footer style="background:#1B1F3B;color:#fff;padding:30px 20px;text-align:center;margin-top:40px">

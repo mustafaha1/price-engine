@@ -37,20 +37,6 @@ router.get('/', async (req, res) => {
 
     var results = await searchService.search(q, options);
 
-    // Fix: Map Amazon/eBay to UK domains for UK users
-    if (options.country === 'UK') {
-      results.forEach(function(product) {
-        if (product.product_url) {
-          if (product.product_url.includes('amazon.com') && !product.product_url.includes('amazon.co.uk')) {
-            product.product_url = product.product_url.replace('amazon.com', 'amazon.co.uk');
-          }
-          if (product.product_url.includes('ebay.com') && !product.product_url.includes('ebay.co.uk')) {
-            product.product_url = product.product_url.replace('ebay.com', 'ebay.co.uk');
-          }
-        }
-      });
-    }
-
     res.json({
       success: true,
       query: q,

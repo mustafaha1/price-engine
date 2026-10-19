@@ -35,6 +35,9 @@ const AFFILIATE_PROGRAMS = {
   'ebay.ch': { tag: '?campid=5339220900&mkevt=1&toolid=80005&mkcid=1' },
   'ebay.ie': { tag: '?campid=5339220900&mkevt=1&toolid=80005&mkcid=1' },
   'ebay.pl': { tag: '?campid=5339220900&mkevt=1&toolid=80005&mkcid=1' },
+  'ebay.com.br': { tag: '?campid=5339220900&mkevt=1&toolid=80005&mkcid=1' },
+  'ebay.in': { tag: '?campid=5339220900&mkevt=1&toolid=80005&mkcid=1' },
+  'ebay.co.jp': { tag: '?campid=5339220900&mkevt=1&toolid=80005&mkcid=1' },
 
   // Walmart domains
   'walmart.com': { tag: '?affp1=priceengine' },
@@ -121,6 +124,9 @@ const MERCHANT_MAP = {
   'ebay.ch': 'ebay.ch',
   'ebay.ie': 'ebay.ie',
   'ebay.pl': 'ebay.pl',
+  'ebay.com.br': 'ebay.com.br',
+  'ebay.in': 'ebay.in',
+  'ebay.co.jp': 'ebay.co.jp',
 
   // Walmart
   'walmart': 'walmart.com',
