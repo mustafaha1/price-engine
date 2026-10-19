@@ -419,9 +419,9 @@
         <option value="price_desc">Price: High to Low</option>
         <option value="rating">Highest Rated</option>
       </select>
-      <input type="number" id="minPrice" placeholder="Min $" onchange="doSearch()">
-      <input type="number" id="maxPrice" placeholder="Max $" onchange="doSearch()">
-      <select id="countrySelect" onchange="doSearch()">
+      <input type="number" id="minPrice" placeholder="Min" onchange="doSearch()">
+      <input type="number" id="maxPrice" placeholder="Max" onchange="doSearch()">
+      <select id="countrySelect" onchange="localStorage.setItem('pe_country_manual','1');setPricePlaceholders();doSearch();">
         <option value="US">US</option><option value="UK">UK</option><option value="CA">CA</option><option value="AU">AU</option>
         <option value="DE">DE</option><option value="FR">FR</option><option value="IT">IT</option><option value="ES">ES</option>
         <option value="NL">NL</option><option value="BR">BR</option><option value="IN">IN</option><option value="JP">JP</option>
@@ -894,8 +894,89 @@
     /* ========== DISPLAY RESULTS ========== */
     function displayResults(products,count,query){ allSearchResults=products||[]; currentSearchQuery=query; activeStoreFilter=null; visibleCount=ITEMS_PER_PAGE; renderVisible(); buildStoreFilters(allSearchResults); initGalleries(); fetchAndShowViews(); }
 
+    /* ========== GEOLOCATION / AUTO-CURRENCY ========== */
+    // Map ip-api country codes to our dropdown values
+    var GEO_COUNTRY_MAP = {
+      'US':'US','GB':'UK','CA':'CA','AU':'AU','DE':'DE','FR':'FR',
+      'IT':'IT','ES':'ES','NL':'NL','BR':'BR','IN':'IN','JP':'JP',
+      'IE':'UK','AT':'DE','BE':'FR','CH':'DE','PL':'DE','SE':'DE',
+      'DK':'DE','NO':'DE','FI':'DE','PT':'ES','GR':'DE','LU':'DE',
+      'CZ':'DE','HU':'DE','SK':'DE','SI':'DE','HR':'DE','RO':'DE',
+      'BG':'DE','LT':'DE','LV':'DE','EE':'DE','MT':'DE','CY':'DE',
+      'MX':'US','AR':'BR','CL':'BR','CO':'BR','PE':'BR','UY':'BR',
+      'VE':'BR','ZA':'UK','NG':'UK','KE':'UK','GH':'UK','UG':'UK',
+      'TZ':'UK','RW':'UK','SG':'AU','MY':'AU','TH':'JP','PH':'JP',
+      'ID':'JP','VN':'JP','KR':'JP','TW':'JP','HK':'JP','NZ':'AU',
+      'CN':'JP','RU':'DE','TR':'DE','UA':'DE','IL':'DE','AE':'UK',
+      'SA':'UK','QA':'UK','KW':'UK','BH':'UK','OM':'UK','JO':'UK',
+      'EG':'UK','PK':'IN','BD':'IN','LK':'IN','NP':'IN','MM':'IN'
+    };
+
+    var CURRENCY_SYMBOLS = {
+      'US':'$','UK':'£','CA':'CA$','AU':'A$','DE':'€','FR':'€',
+      'IT':'€','ES':'€','NL':'€','BR':'R$','IN':'₹','JP':'¥'
+    };
+
+    function setPricePlaceholders() {
+      var country = document.getElementById('countrySelect').value;
+      var sym = CURRENCY_SYMBOLS[country] || '$';
+      document.getElementById('minPrice').placeholder = 'Min ' + sym;
+      document.getElementById('maxPrice').placeholder = 'Max ' + sym;
+    }
+
+    function showGeoToast(message) {
+      var toast = document.createElement('div');
+      toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1B1F3B;color:#fff;padding:10px 20px;border-radius:8px;font-size:.85rem;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.3);animation:fadeInUp .3s ease;';
+      toast.innerHTML = '<i class="fas fa-map-marker-alt" style="color:var(--green);margin-right:6px;"></i>' + message;
+      document.body.appendChild(toast);
+      setTimeout(function(){ toast.style.opacity='0'; toast.style.transition='opacity .5s'; setTimeout(function(){toast.remove();},500); }, 3500);
+    }
+
+    function detectUserLocation() {
+      // Check if user already manually selected a country
+      var saved = localStorage.getItem('pe_country_manual');
+      if (saved) { setPricePlaceholders(); return; }
+
+      // Try to get from previous auto-detection
+      var autoCountry = localStorage.getItem('pe_country_auto');
+      if (autoCountry) {
+        var sel = document.getElementById('countrySelect');
+        for (var i=0;i<sel.options.length;i++){
+          if(sel.options[i].value===autoCountry){ sel.value=autoCountry; break; }
+        }
+        setPricePlaceholders();
+        return;
+      }
+
+      // Detect via free IP geolocation API (no key needed)
+      fetch('https://ipapi.co/json/')
+        .then(function(r){ return r.json(); })
+        .then(function(data){
+          if(!data || !data.country_code) return;
+          var mapped = GEO_COUNTRY_MAP[data.country_code];
+          if(!mapped) return;
+          var sel = document.getElementById('countrySelect');
+          var found = false;
+          for(var i=0;i<sel.options.length;i++){
+            if(sel.options[i].value===mapped){ sel.value=mapped; found=true; break; }
+          }
+          if(found){
+            localStorage.setItem('pe_country_auto', mapped);
+            setPricePlaceholders();
+            var sym = CURRENCY_SYMBOLS[mapped] || '$';
+            var countryNames = {'US':'United States','UK':'United Kingdom','CA':'Canada','AU':'Australia','DE':'Germany','FR':'France','IT':'Italy','ES':'Spain','NL':'Netherlands','BR':'Brazil','IN':'India','JP':'Japan'};
+            showGeoToast('Showing prices in ' + sym + ' for ' + (countryNames[mapped]||mapped));
+            // Refresh search with new country if results already showing
+            var q = document.getElementById('searchInput').value.trim();
+            if(q) doSearch();
+          }
+        })
+        .catch(function(e){ setPricePlaceholders(); });
+    }
+
     /* ========== INIT ========== */
     window.addEventListener('DOMContentLoaded',function(){
+      detectUserLocation();
       buildCarouselDots(); document.getElementById('categoryCarousel').style.display='flex'; document.getElementById('carouselDots').style.display='flex'; updateCategoryIndicator(); renderRecentlyViewed();
       setTimeout(function(){ var cat=TRENDING_CATEGORIES[currentCategoryIndex]; document.getElementById('searchInput').value=cat.query; doSearch(); },500);
     });
