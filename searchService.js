@@ -44,7 +44,14 @@ const SUPPORTED_COUNTRIES = {
   'NL': { gl: 'nl', hl: 'nl', ebay: 'EBAY_NL' },
   'BR': { gl: 'br', hl: 'pt', ebay: 'EBAY_BR' },
   'IN': { gl: 'in', hl: 'en', ebay: 'EBAY_IN' },
-  'JP': { gl: 'jp', hl: 'ja', ebay: 'EBAY_JP' }
+  'JP': { gl: 'jp', hl: 'ja', ebay: 'EBAY_JP' },
+  'AE': { gl: 'ae', hl: 'en', ebay: 'EBAY_US' },
+  'SA': { gl: 'sa', hl: 'ar', ebay: 'EBAY_US' },
+  'SG': { gl: 'sg', hl: 'en', ebay: 'EBAY_US' },
+  'SE': { gl: 'se', hl: 'sv', ebay: 'EBAY_SE' },
+  'PL': { gl: 'pl', hl: 'pl', ebay: 'EBAY_PL' },
+  'MX': { gl: 'mx', hl: 'es', ebay: 'EBAY_US' },
+  'TR': { gl: 'tr', hl: 'tr', ebay: 'EBAY_US' }
 };
 
 async function search(query, options) {
@@ -169,7 +176,8 @@ async function searchGoogleShopping(query, countryConfig, options, limit) {
         'uk': 'ebay.co.uk', 'de': 'ebay.de', 'fr': 'ebay.fr',
         'ca': 'ebay.ca', 'au': 'ebay.com.au', 'it': 'ebay.it',
         'es': 'ebay.es', 'nl': 'ebay.nl', 'br': 'ebay.com.br',
-        'in': 'ebay.in', 'jp': 'ebay.co.jp'
+        'in': 'ebay.in', 'jp': 'ebay.co.jp', 'se': 'ebay.se',
+        'pl': 'ebay.pl'
       };
       if (url.includes('ebay.com') && ebayDomainMap[countryConfig.gl]) {
         var targetEbay = ebayDomainMap[countryConfig.gl];
@@ -183,7 +191,9 @@ async function searchGoogleShopping(query, countryConfig, options, limit) {
         'uk': 'amazon.co.uk', 'de': 'amazon.de', 'fr': 'amazon.fr',
         'ca': 'amazon.ca', 'au': 'amazon.com.au', 'it': 'amazon.it',
         'es': 'amazon.es', 'nl': 'amazon.nl', 'br': 'amazon.com.br',
-        'in': 'amazon.in', 'jp': 'amazon.co.jp'
+        'in': 'amazon.in', 'jp': 'amazon.co.jp', 'ae': 'amazon.ae',
+        'sa': 'amazon.sa', 'sg': 'amazon.sg', 'se': 'amazon.se',
+        'pl': 'amazon.pl', 'mx': 'amazon.com.mx', 'tr': 'amazon.com.tr'
       };
       if (url.includes('amazon.com') && amazonDomainMap[countryConfig.gl]) {
         var targetAmazon = amazonDomainMap[countryConfig.gl];

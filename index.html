@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>PriceEngine - Compare Prices & Find the Best Deals Online</title>
   <meta name="description" content="Compare prices from Amazon, eBay, Walmart, AliExpress and more. Find the best deals on electronics, fashion, home, beauty & more. Save money with PriceEngine.">
-  <meta name="keywords" content="price comparison, compare prices, best deals, online shopping, price tracker, cheap prices, Amazon deals, eBay deals, save money">
+  <meta name="keywords" content="price comparison, compare prices, best deals, online shopping, price tracker, cheap prices, Amazon deals, eBay deals, Walmart deals, Argos deals, Currys deals, save money, price checker, deal finder, cheapest prices">
   <meta name="author" content="PriceEngine">
   <meta name="robots" content="index, follow">
   <meta name="google-site-verification" content="YdOhUshefGkRnOdO_74nLQxYshYtOUVtvhYIWzbaprc">
@@ -425,6 +425,8 @@
         <option value="US">US</option><option value="UK">UK</option><option value="CA">CA</option><option value="AU">AU</option>
         <option value="DE">DE</option><option value="FR">FR</option><option value="IT">IT</option><option value="ES">ES</option>
         <option value="NL">NL</option><option value="BR">BR</option><option value="IN">IN</option><option value="JP">JP</option>
+        <option value="AE">UAE</option><option value="SA">SA</option><option value="SG">SG</option><option value="SE">SE</option>
+        <option value="PL">PL</option><option value="MX">MX</option><option value="TR">TR</option>
       </select>
     </div>
     <div class="image-preview-area" id="imagePreviewArea">
@@ -899,22 +901,23 @@
     var GEO_COUNTRY_MAP = {
       'US':'US','GB':'UK','CA':'CA','AU':'AU','DE':'DE','FR':'FR',
       'IT':'IT','ES':'ES','NL':'NL','BR':'BR','IN':'IN','JP':'JP',
-      'IE':'UK','AT':'DE','BE':'FR','CH':'DE','PL':'DE','SE':'DE',
-      'DK':'DE','NO':'DE','FI':'DE','PT':'ES','GR':'DE','LU':'DE',
+      'AE':'AE','SA':'SA','SG':'SG','SE':'SE','PL':'PL','MX':'MX','TR':'TR',
+      'IE':'UK','AT':'DE','BE':'FR','CH':'DE','PT':'ES','GR':'DE','LU':'DE',
+      'DK':'DE','NO':'DE','FI':'DE',
       'CZ':'DE','HU':'DE','SK':'DE','SI':'DE','HR':'DE','RO':'DE',
       'BG':'DE','LT':'DE','LV':'DE','EE':'DE','MT':'DE','CY':'DE',
-      'MX':'US','AR':'BR','CL':'BR','CO':'BR','PE':'BR','UY':'BR',
-      'VE':'BR','ZA':'UK','NG':'UK','KE':'UK','GH':'UK','UG':'UK',
-      'TZ':'UK','RW':'UK','SG':'AU','MY':'AU','TH':'JP','PH':'JP',
-      'ID':'JP','VN':'JP','KR':'JP','TW':'JP','HK':'JP','NZ':'AU',
-      'CN':'JP','RU':'DE','TR':'DE','UA':'DE','IL':'DE','AE':'UK',
-      'SA':'UK','QA':'UK','KW':'UK','BH':'UK','OM':'UK','JO':'UK',
-      'EG':'UK','PK':'IN','BD':'IN','LK':'IN','NP':'IN','MM':'IN'
+      'AR':'BR','CL':'BR','CO':'BR','PE':'BR','UY':'BR','VE':'BR',
+      'ZA':'UK','NG':'UK','KE':'UK','GH':'UK','UG':'UK','TZ':'UK','RW':'UK',
+      'MY':'AU','TH':'JP','PH':'JP','ID':'JP','VN':'JP','KR':'JP','TW':'JP','HK':'JP','NZ':'AU',
+      'CN':'JP','RU':'DE','UA':'DE','IL':'DE',
+      'QA':'UK','KW':'UK','BH':'UK','OM':'UK','JO':'UK','EG':'UK',
+      'PK':'IN','BD':'IN','LK':'IN','NP':'IN','MM':'IN'
     };
 
     var CURRENCY_SYMBOLS = {
       'US':'$','UK':'£','CA':'CA$','AU':'A$','DE':'€','FR':'€',
-      'IT':'€','ES':'€','NL':'€','BR':'R$','IN':'₹','JP':'¥'
+      'IT':'€','ES':'€','NL':'€','BR':'R$','IN':'₹','JP':'¥',
+      'AE':'AED','SA':'SAR','SG':'S$','SE':'kr','PL':'zł','MX':'MX$','TR':'₺'
     };
 
     function setPricePlaceholders() {
@@ -961,7 +964,7 @@
           localStorage.setItem('pe_country_auto', mapped);
           setPricePlaceholders();
           var sym = CURRENCY_SYMBOLS[mapped] || '$';
-          var countryNames = {'US':'United States','UK':'United Kingdom','CA':'Canada','AU':'Australia','DE':'Germany','FR':'France','IT':'Italy','ES':'Spain','NL':'Netherlands','BR':'Brazil','IN':'India','JP':'Japan'};
+          var countryNames = {'US':'United States','UK':'United Kingdom','CA':'Canada','AU':'Australia','DE':'Germany','FR':'France','IT':'Italy','ES':'Spain','NL':'Netherlands','BR':'Brazil','IN':'India','JP':'Japan','AE':'UAE','SA':'Saudi Arabia','SG':'Singapore','SE':'Sweden','PL':'Poland','MX':'Mexico','TR':'Turkey'};
           showGeoToast('Showing prices in ' + sym + ' for ' + (countryNames[mapped]||mapped));
           return true;
         }
@@ -971,23 +974,24 @@
       // Detect from browser language (instant, no API call needed)
       var lang = (navigator.language || navigator.userLanguage || 'en-US').toUpperCase();
       var langMap = {
-        'EN-GB':'UK','EN-US':'US','EN-CA':'CA','EN-AU':'AU','EN-IE':'UK','EN-NZ':'AU',
+        'EN-GB':'UK','EN-US':'US','EN-CA':'CA','EN-AU':'AU','EN-IE':'UK','EN-NZ':'AU','EN-SG':'SG',
         'DE-DE':'DE','DE-AT':'DE','DE-CH':'DE',
         'FR-FR':'FR','FR-CA':'CA','FR-BE':'FR','FR-CH':'FR',
         'IT-IT':'IT','IT-CH':'IT',
-        'ES-ES':'ES','ES-MX':'US','ES-AR':'BR','ES-CO':'BR','ES-PE':'BR','ES-CL':'BR',
+        'ES-ES':'ES','ES-MX':'MX','ES-AR':'BR','ES-CO':'BR','ES-PE':'BR','ES-CL':'BR',
         'NL-NL':'NL','NL-BE':'NL',
         'PT-BR':'BR','PT-PT':'ES',
         'JA-JP':'JP',
         'HI-IN':'IN','BN-IN':'IN','TA-IN':'IN','TE-IN':'IN','MR-IN':'IN','GU-IN':'IN','KN-IN':'IN','ML-IN':'IN','PA-IN':'IN','UR-IN':'IN',
-        'SV-SE':'DE','NB-NO':'DE','DA-DK':'DE','FI-FI':'DE',
-        'PL-PL':'DE','CS-CZ':'DE','HU-HU':'DE','RO-RO':'DE','BG-BG':'DE','HR-HR':'DE','SK-SK':'DE','SL-SI':'DE','LT-LT':'DE','LV-LV':'DE','ET-EE':'DE',
-        'EL-GR':'DE','TR-TR':'DE',
-        'RU-RU':'DE','UK-UA':'DE',
-        'KO-KR':'JP','ZH-CN':'JP','ZH-TW':'JP','ZH-HK':'JP','TH-TH':'JP','VI-VN':'JP','MS-MY':'AU','ID-ID':'JP','TL-PH':'JP',
-        'AR-SA':'UK','AR-AE':'UK','AR-QA':'UK','AR-KW':'UK','AR-EG':'UK','HE-IL':'DE','FA-IR':'DE',
-        'ZU-ZA':'UK','AF-ZA':'UK','SW-KE':'UK','SW-TZ':'UK','RW-RW':'UK','HA-NG':'UK','YO-NG':'UK',
-        'UR-PK':'IN','BN-BD':'IN','SI-LK':'IN','NE-NP':'IN'
+        'SV-SE':'SE','NB-NO':'SE','DA-DK':'SE','FI-FI':'SE',
+        'PL-PL':'PL','CS-CZ':'PL','HU-HU':'PL','RO-RO':'PL','BG-BG':'PL','HR-HR':'PL','SK-SK':'PL','SL-SI':'PL','LT-LT':'PL','LV-LV':'PL','ET-EE':'PL',
+        'EL-GR':'PL',
+        'RU-RU':'PL','UK-UA':'PL','BE-BY':'PL',
+        'TR-TR':'TR','AZ-AZ':'TR','KK-KZ':'TR','UZ-UZ':'TR','KY-KG':'TR','TK-TM':'TR','TUD-TR':'TR',
+        'KO-KR':'JP','ZH-CN':'JP','ZH-TW':'JP','ZH-HK':'JP','ZH-SG':'SG','TH-TH':'JP','VI-VN':'JP','MS-MY':'SG','ID-ID':'JP','TL-PH':'JP',
+        'AR-SA':'SA','AR-AE':'AE','AR-QA':'SA','AR-KW':'SA','AR-BH':'SA','AR-OM':'SA','AR-JO':'SA','AR-EG':'SA','AR-LY':'SA','AR-TN':'SA','AR-DZ':'SA','AR-MA':'SA','AR-IQ':'SA','AR-YE':'SA','AR-SD':'SA','AR-SO':'SA',
+        'HE-IL':'PL','FA-IR':'SA','UR-PK':'IN','BN-BD':'IN','SI-LK':'IN','NE-NP':'IN',
+        'ZU-ZA':'UK','AF-ZA':'UK','SW-KE':'UK','SW-TZ':'UK','RW-RW':'UK','HA-NG':'UK','YO-NG':'UK','AM-ET':'UK'
       };
       var mapped = langMap[lang];
       if(!mapped && lang.indexOf('-')>-1){
