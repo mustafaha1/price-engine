@@ -252,8 +252,13 @@ function addAffiliateLink(product) {
     product.original_url = product.product_url;
     const url = product.product_url;
 
-    // eBay affiliate tag now added to ALL eBay pages (item + search)
-    // Tested and confirmed working - do NOT skip search pages
+    // eBay campid only works on item pages (/itm/), NOT search pages (/sch/)
+    // Adding campid to /sch/ causes eBay to kick the user out - CONFIRMED BY USER
+    var isEbaySearchPage = url.includes('ebay.') && url.includes('/sch/');
+    if (isEbaySearchPage) {
+      // Skip adding affiliate tag to eBay search pages
+      return product;
+    }
 
     if (affiliate.tag.startsWith('?')) {
       const separator = url.includes('?') ? '&' : '?';
