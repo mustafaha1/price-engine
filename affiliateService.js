@@ -1,24 +1,25 @@
 const AFFILIATE_PROGRAMS = {
-  // Amazon domains (direct links) — all share same affiliate tag
-  'amazon.com': { tag: '?tag=priceeengine08-20' },
-  'amazon.co.uk': { tag: '?tag=priceeengine08-20' },
-  'amazon.ca': { tag: '?tag=priceeengine08-20' },
-  'amazon.de': { tag: '?tag=priceeengine08-20' },
-  'amazon.fr': { tag: '?tag=priceeengine08-20' },
-  'amazon.it': { tag: '?tag=priceeengine08-20' },
-  'amazon.es': { tag: '?tag=priceeengine08-20' },
-  'amazon.co.jp': { tag: '?tag=priceeengine08-20' },
-  'amazon.in': { tag: '?tag=priceeengine08-20' },
-  'amazon.com.au': { tag: '?tag=priceeengine08-20' },
-  'amazon.com.br': { tag: '?tag=priceeengine08-20' },
-  'amazon.nl': { tag: '?tag=priceeengine08-20' },
-  'amazon.se': { tag: '?tag=priceeengine08-20' },
-  'amazon.pl': { tag: '?tag=priceeengine08-20' },
-  'amazon.sg': { tag: '?tag=priceeengine08-20' },
-  'amazon.ae': { tag: '?tag=priceeengine08-20' },
-  'amazon.sa': { tag: '?tag=priceeengine08-20' },
-  'amazon.com.tr': { tag: '?tag=priceeengine08-20' },
-  'amazon.com.mx': { tag: '?tag=priceeengine08-20' },
+  // Amazon domains — COUNTRY-SPECIFIC tracking IDs
+  // US tag for Americas/Asia/default | UK tag for UK | EU tag for EU
+  'amazon.com': { tag: '?tag=priceeengine08-20' },       // US
+  'amazon.co.uk': { tag: '?tag=priceengine21-21' },       // UK
+  'amazon.ca': { tag: '?tag=priceeengine08-20' },         // US (same programme)
+  'amazon.de': { tag: '?tag=priceengine0d-21' },          // EU (Germany)
+  'amazon.fr': { tag: '?tag=priceengine0d-21' },          // EU (France)
+  'amazon.it': { tag: '?tag=priceengine0d-21' },          // EU (Italy)
+  'amazon.es': { tag: '?tag=priceengine0d-21' },          // EU (Spain)
+  'amazon.co.jp': { tag: '?tag=priceeengine08-20' },      // US default
+  'amazon.in': { tag: '?tag=priceeengine08-20' },         // US default
+  'amazon.com.au': { tag: '?tag=priceeengine08-20' },     // US default
+  'amazon.com.br': { tag: '?tag=priceeengine08-20' },     // US default
+  'amazon.nl': { tag: '?tag=priceengine0d-21' },          // EU (Netherlands)
+  'amazon.se': { tag: '?tag=priceengine0d-21' },          // EU (Sweden)
+  'amazon.pl': { tag: '?tag=priceengine0d-21' },          // EU (Poland)
+  'amazon.sg': { tag: '?tag=priceeengine08-20' },         // US default
+  'amazon.ae': { tag: '?tag=priceeengine08-20' },         // US default
+  'amazon.sa': { tag: '?tag=priceeengine08-20' },         // US default
+  'amazon.com.tr': { tag: '?tag=priceeengine08-20' },     // US default
+  'amazon.com.mx': { tag: '?tag=priceeengine08-20' },     // US (same programme)
 
   // eBay domains
   'ebay.com': { tag: '?campid=5339220900&mkevt=1&toolid=80005&mkcid=1' },
@@ -252,12 +253,10 @@ function addAffiliateLink(product) {
     product.original_url = product.product_url;
     const url = product.product_url;
 
-    // eBay campid only works on item pages (/itm/), NOT search pages (/sch/)
-    // Adding campid to /sch/ causes eBay to kick the user out - CONFIRMED BY USER
-    var isEbaySearchPage = url.includes('ebay.') && url.includes('/sch/');
+    // eBay search pages (/sch/) BREAK when campid is added — skip them
+    const isEbaySearchPage = url.includes('ebay.') && url.includes('/sch/');
     if (isEbaySearchPage) {
-      // Skip adding affiliate tag to eBay search pages
-      return product;
+      return product; // Skip adding affiliate tag to eBay search pages
     }
 
     if (affiliate.tag.startsWith('?')) {
