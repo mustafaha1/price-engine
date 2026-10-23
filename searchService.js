@@ -68,18 +68,21 @@ async function search(query, options) {
     }
 
     // Search SerpAPI Google Shopping, eBay, AND AliExpress in parallel
+    // Cap eBay at 10 so it doesn't overwhelm other sources
     var [googleResults, ebayResults, aliResults] = await Promise.allSettled([
       searchGoogleShopping(query, countryConfig, options, limit),
-      searchEbay(query, countryConfig, options, limit),
+      searchEbay(query, countryConfig, options, 10),
       searchAliExpress(query, options, limit)
     ]);
 
-    var products = [];
+    var googleProducts = [];
+    var ebayProducts = [];
+    var aliProducts = [];
 
     // Add Google Shopping results
     if (googleResults.status === 'fulfilled' && googleResults.value) {
       console.log('[SEARCH] Google Shopping returned', googleResults.value.length, 'results');
-      products = products.concat(googleResults.value);
+      googleProducts = googleResults.value;
     } else if (googleResults.status === 'rejected') {
       console.error('[SEARCH] Google Shopping failed:', googleResults.reason.message);
     }
@@ -87,7 +90,7 @@ async function search(query, options) {
     // Add eBay results
     if (ebayResults.status === 'fulfilled' && ebayResults.value) {
       console.log('[SEARCH] eBay API returned', ebayResults.value.length, 'results');
-      products = products.concat(ebayResults.value);
+      ebayProducts = ebayResults.value;
     } else if (ebayResults.status === 'rejected') {
       console.error('[SEARCH] eBay API failed:', ebayResults.reason.message);
     } else {
@@ -97,9 +100,19 @@ async function search(query, options) {
     // Add AliExpress results
     if (aliResults.status === 'fulfilled' && aliResults.value) {
       console.log('[SEARCH] AliExpress API returned', aliResults.value.length, 'results');
-      products = products.concat(aliResults.value);
+      aliProducts = aliResults.value;
     } else if (aliResults.status === 'rejected') {
       console.error('[SEARCH] AliExpress API failed:', aliResults.reason.message);
+    }
+
+    // Interleave results so no single source dominates
+    // Order: Google, eBay, Ali, Google, eBay, Ali... (round-robin)
+    var products = [];
+    var maxLen = Math.max(googleProducts.length, ebayProducts.length, aliProducts.length);
+    for (var i = 0; i < maxLen; i++) {
+      if (i < googleProducts.length) products.push(googleProducts[i]);
+      if (i < ebayProducts.length) products.push(ebayProducts[i]);
+      if (i < aliProducts.length) products.push(aliProducts[i]);
     }
 
     // If all failed, return demo results
@@ -311,7 +324,7 @@ async function getEbayOAuthToken() {
       'Content-Type': 'application/x-www-form-urlencoded',
       'Authorization': 'Basic ' + credentials
     },
-    body: 'grant_type=client_credentials&scope=https://api.ebay.com/oauth/api_scope/buy.item.feed'
+    body: 'grant_type=client_credentials&scope=https://api.ebay.com/oauth/api_scope'
   });
 
   if (!response.ok) {
@@ -345,11 +358,12 @@ async function searchEbay(query, countryConfig, options, limit) {
       'q=' + encodeURIComponent(query) +
       '&limit=' + entriesPerPage;
 
-    if (options.minPrice !== undefined) {
-      url += '&filter=price:[..' + options.minPrice + ']';
-    }
-    if (options.maxPrice !== undefined) {
-      url += '&filter=price:[' + (options.minPrice || '0') + '..' + options.maxPrice + ']';
+    if (options.minPrice !== undefined && options.maxPrice !== undefined) {
+      url += '&filter=price:[' + options.minPrice + '..' + options.maxPrice + ']';
+    } else if (options.minPrice !== undefined) {
+      url += '&filter=price:[' + options.minPrice + '..' + ']';
+    } else if (options.maxPrice !== undefined) {
+      url += '&filter=price:[..' + options.maxPrice + ']';
     }
 
     var response = await fetch(url, {
