@@ -347,14 +347,10 @@
       .logo i { font-size:1.4rem; }
       .nav-search { width:calc(100% - 50px); margin-left:0; }
       .search-box { max-width:100%; }
-      /* Fix filter bar on mobile - 2x2 grid so all options are visible */
-      .filter-sticky { position:relative; top:auto; padding:8px 12px; background:var(--bg); border-bottom:1px solid var(--border); display:block !important; }
-      .filter-bar { display:grid; grid-template-columns:1fr 1fr; gap:8px; max-width:100%; }
-      .filter-bar select, .filter-bar input { padding:10px 12px; font-size:.85rem; width:100%; min-width:0; height:44px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--text); }
-      .filter-bar #sortSelect { grid-column:1 / 2; }
-      .filter-bar #countrySelect { grid-column:2 / 3; }
-      .filter-bar #minPrice { grid-column:1 / 2; }
-      .filter-bar #maxPrice { grid-column:2 / 3; }
+      /* Fix filter bar on mobile - clear 2x2 layout */
+      .filter-sticky { position:relative; top:auto; padding:10px 12px; background:var(--bg); border-bottom:1px solid var(--border); display:block; }
+      .filter-bar { display:flex; flex-wrap:wrap; gap:8px; max-width:100%; margin:0; }
+      .filter-bar select, .filter-bar input { flex:1 1 45%; min-width:140px; max-width:calc(50% - 4px); padding:10px 12px; font-size:.85rem; height:44px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--text); box-sizing:border-box; }
       /* Hide clutter on mobile */
       .view-badge { display:none; }
       .stock-badge { display:none; }
