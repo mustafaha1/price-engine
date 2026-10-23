@@ -321,7 +321,7 @@
       .nav-actions { display:none; }
       .hamburger { display:block; }
       .nav-search { max-width:none; }
-      .main-content { padding-top:140px; }
+      .main-content { padding-top:0; }
       .hero h1 { font-size:1.3rem; }
       .stats-grid { grid-template-columns:repeat(2,1fr); }
       .share-grid { grid-template-columns:repeat(3,1fr); }
@@ -342,13 +342,13 @@
       .rating-row { margin-bottom:4px; }
       .rating-stars { font-size:.75rem; }
       .rating-count { font-size:.7rem; }
-      /* Fix filter bar on mobile */
-      .filter-sticky { padding:8px 12px; top:88px; }
-      .filter-bar { gap:6px; }
-      .filter-bar select, .filter-bar input { padding:8px 10px; font-size:.8rem; min-width:100px; flex-shrink:0; }
-      .filter-bar input { min-width:70px; width:70px; }
-      .filter-bar #sortSelect { min-width:140px; }
-      .filter-bar #countrySelect { min-width:80px; }
+      /* Fix filter bar on mobile - remove sticky so it flows below nav */
+      .filter-sticky { position:relative; top:auto; padding:8px 12px; }
+      .filter-bar { gap:6px; flex-wrap:nowrap; }
+      .filter-bar select, .filter-bar input { padding:8px 10px; font-size:.8rem; min-width:0; flex-shrink:1; }
+      .filter-bar input { width:60px; min-width:60px; }
+      .filter-bar #sortSelect { min-width:130px; flex-shrink:0; }
+      .filter-bar #countrySelect { min-width:70px; flex-shrink:0; }
       /* Hide clutter on mobile */
       .view-badge { display:none; }
       .stock-badge { display:none; }
