@@ -286,80 +286,111 @@ async function searchGoogleShopping(query, countryConfig, options, limit) {
     .filter(item => item && (item.price > 0 || !item.price));
 }
 
+/* ========== EBAY BROWSE API (OAuth) ========== */
+var ebayOAuthToken = null;
+var ebayTokenExpiry = 0;
+
+async function getEbayOAuthToken() {
+  var clientId = process.env.EBAY_APP_ID;
+  var clientSecret = process.env.EBAY_CLIENT_SECRET;
+
+  if (!clientId || !clientSecret) {
+    throw new Error('EBAY_APP_ID or EBAY_CLIENT_SECRET not set');
+  }
+
+  // Return cached token if still valid (with 5 min buffer)
+  if (ebayOAuthToken && Date.now() < (ebayTokenExpiry - 300000)) {
+    return ebayOAuthToken;
+  }
+
+  var credentials = Buffer.from(clientId + ':' + clientSecret).toString('base64');
+
+  var response = await fetch('https://api.ebay.com/identity/v1/oauth2/token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Authorization': 'Basic ' + credentials
+    },
+    body: 'grant_type=client_credentials&scope=https://api.ebay.com/oauth/api_scope/buy.item.feed'
+  });
+
+  if (!response.ok) {
+    var errText = await response.text();
+    throw new Error('eBay OAuth failed: ' + response.status + ' ' + errText);
+  }
+
+  var data = await response.json();
+  ebayOAuthToken = data.access_token;
+  // expires_in is in seconds, convert to ms
+  ebayTokenExpiry = Date.now() + (data.expires_in * 1000);
+  console.log('[EBAY] OAuth token obtained, expires in', data.expires_in, 'seconds');
+  return ebayOAuthToken;
+}
+
 async function searchEbay(query, countryConfig, options, limit) {
-  var ebayAppId = process.env.EBAY_APP_ID;
-  if (!ebayAppId) {
-    console.log('EBAY_APP_ID not set, skipping eBay search');
+  var clientId = process.env.EBAY_APP_ID;
+  var clientSecret = process.env.EBAY_CLIENT_SECRET;
+
+  if (!clientId || !clientSecret) {
+    console.log('EBAY_APP_ID or EBAY_CLIENT_SECRET not set, skipping eBay search');
     return [];
   }
 
   try {
-    var ebayGlobalId = countryConfig.ebay || 'EBAY_US';
+    var token = await getEbayOAuthToken();
+    var marketplaceId = countryConfig.ebay || 'EBAY_US';
     var entriesPerPage = Math.min(limit, 30);
 
-    var url = 'https://svcs.ebay.com/services/search/FindingService/v1?' +
-      'OPERATION-NAME=findItemsByKeywords' +
-      '&SERVICE-VERSION=1.0.0' +
-      '&SECURITY-APPNAME=' + encodeURIComponent(ebayAppId) +
-      '&RESPONSE-DATA-FORMAT=JSON' +
-      '&REST-PAYLOAD' +
-      '&GLOBAL-ID=' + ebayGlobalId +
-      '&keywords=' + encodeURIComponent(query) +
-      '&paginationInput.entriesPerPage=' + entriesPerPage;
+    var url = 'https://api.ebay.com/buy/browse/v1/item_summary/search?' +
+      'q=' + encodeURIComponent(query) +
+      '&limit=' + entriesPerPage;
 
     if (options.minPrice !== undefined) {
-      url += '&itemFilter(0).name=MinPrice&itemFilter(0).value=' + options.minPrice;
+      url += '&filter=price:[..' + options.minPrice + ']';
     }
     if (options.maxPrice !== undefined) {
-      var idx = options.minPrice !== undefined ? 1 : 0;
-      url += '&itemFilter(' + idx + ').name=MaxPrice&itemFilter(' + idx + ').value=' + options.maxPrice;
+      url += '&filter=price:[' + (options.minPrice || '0') + '..' + options.maxPrice + ']';
     }
 
     var response = await fetch(url, {
       method: 'GET',
-      headers: { 'Accept': 'application/json' }
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'X-EBAY-C-MARKETPLACE-ID': marketplaceId,
+        'Content-Type': 'application/json'
+      }
     });
 
     if (!response.ok) {
-      throw new Error('eBay API error: ' + response.status);
+      var errText = await response.text();
+      throw new Error('eBay Browse API error: ' + response.status + ' ' + errText);
     }
 
     var data = await response.json();
 
-    var searchResult = data.findItemsByKeywordsResponse &&
-                       data.findItemsByKeywordsResponse[0] &&
-                       data.findItemsByKeywordsResponse[0].searchResult &&
-                       data.findItemsByKeywordsResponse[0].searchResult[0];
-
-    if (!searchResult || !searchResult.item) {
+    if (!data.itemSummaries || data.itemSummaries.length === 0) {
       return [];
     }
 
-    var items = Array.isArray(searchResult.item) ? searchResult.item : [searchResult.item];
-
-    return items.map((item, index) => {
-      var title = item.title && item.title[0] ? item.title[0] : 'Unknown Product';
-      var priceObj = item.sellingStatus && item.sellingStatus[0] &&
-                     item.sellingStatus[0].currentPrice && item.sellingStatus[0].currentPrice[0];
-      var price = priceObj ? parseFloat(priceObj.__value__) : null;
-      var currency = priceObj ? priceObj['@currencyId'] : 'USD';
-      var image = item.galleryURL && item.galleryURL[0] ? item.galleryURL[0] : null;
-      var url = item.viewItemURL && item.viewItemURL[0] ? item.viewItemURL[0] : '#';
-      var condition = item.condition && item.condition[0] && item.condition[0].conditionDisplayName ?
-                      item.condition[0].conditionDisplayName[0] : '';
-      var topRated = item.topRatedListing && item.topRatedListing[0] === 'true';
-      var seller = item.sellerInfo && item.sellerInfo[0] && item.sellerInfo[0].sellerUserName ?
-                   item.sellerInfo[0].sellerUserName[0] : 'eBay Seller';
+    return data.itemSummaries.map((item, index) => {
+      var title = item.title || 'Unknown Product';
+      var price = item.price ? parseFloat(item.price.value) : null;
+      var currency = item.price ? item.price.currency : 'USD';
+      var image = item.image ? item.image.imageUrl : null;
+      var itemUrl = item.itemWebUrl || '#';
+      var condition = item.condition || '';
+      var seller = item.seller && item.seller.username ? item.seller.username : 'eBay Seller';
+      var topRated = item.topRatedBuyingExperience || false;
 
       var product = {
-        id: 'ebay_' + index + '_' + Date.now(),
+        id: 'ebay_' + (item.itemId || index) + '_' + Date.now(),
         title: title,
         description: condition,
         price: price,
         currency: currency,
         image: image,
         images: [image],
-        product_url: url,
+        product_url: itemUrl,
         source: 'eBay - ' + seller,
         rating: topRated ? 4.5 : null,
         reviews: null,
