@@ -202,8 +202,8 @@ async function searchGoogleShopping(query, countryConfig, options, limit) {
         }
       }
 
-      // If Google gives us a knowledge panel URL (not a direct merchant link),
-      // build a direct merchant search URL with affiliate tag instead
+      // If Google gives us a redirect URL (not a direct merchant link),
+      // try to build a direct merchant link for known partners
       if (isGoogleUrl || url === '#' || !url.startsWith('http')) {
         var searchQuery = encodeURIComponent(item.title || query);
 
@@ -221,9 +221,14 @@ async function searchGoogleShopping(query, countryConfig, options, limit) {
           // Direct eBay search (campid only works on item pages, not search pages)
           var ebayDomain = ebayDomainMap[countryConfig.gl] || 'ebay.com';
           url = 'https://www.' + ebayDomain + '/sch/i.html?_nkw=' + searchQuery;
+        } else if (rawUrl && rawUrl.startsWith('http')) {
+          // Unknown source but we have a Google redirect URL — keep it!
+          // It will redirect to the merchant. Don't send users to Google search.
+          url = rawUrl;
         } else {
-          // Unknown source — keep Google search as fallback
-          url = 'https://www.google.com/search?q=' + searchQuery;
+          // No usable URL at all — skip this product by returning null
+          // (filtered out below)
+          return null;
         }
       }
 
@@ -261,7 +266,7 @@ async function searchGoogleShopping(query, countryConfig, options, limit) {
 
       return affiliateService.addAffiliateLink(product);
     })
-    .filter(item => item.price > 0 || !item.price);
+    .filter(item => item && (item.price > 0 || !item.price));
 }
 
 async function searchEbay(query, countryConfig, options, limit) {
