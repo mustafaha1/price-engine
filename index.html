@@ -342,13 +342,19 @@
       .rating-row { margin-bottom:4px; }
       .rating-stars { font-size:.75rem; }
       .rating-count { font-size:.7rem; }
-      /* Fix filter bar on mobile - remove sticky so it flows below nav */
-      .filter-sticky { position:relative; top:auto; padding:8px 12px; }
-      .filter-bar { gap:6px; flex-wrap:nowrap; }
-      .filter-bar select, .filter-bar input { padding:8px 10px; font-size:.8rem; min-width:0; flex-shrink:1; }
-      .filter-bar input { width:60px; min-width:60px; }
-      .filter-bar #sortSelect { min-width:130px; flex-shrink:0; }
-      .filter-bar #countrySelect { min-width:70px; flex-shrink:0; }
+      /* Compact header on mobile */
+      .logo { font-size:0; gap:0; }
+      .logo i { font-size:1.4rem; }
+      .nav-search { width:calc(100% - 50px); margin-left:0; }
+      .search-box { max-width:100%; }
+      /* Fix filter bar on mobile - 2x2 grid so all options are visible */
+      .filter-sticky { position:relative; top:auto; padding:8px 12px; background:var(--bg); border-bottom:1px solid var(--border); display:block !important; }
+      .filter-bar { display:grid; grid-template-columns:1fr 1fr; gap:8px; max-width:100%; }
+      .filter-bar select, .filter-bar input { padding:10px 12px; font-size:.85rem; width:100%; min-width:0; height:44px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--text); }
+      .filter-bar #sortSelect { grid-column:1 / 2; }
+      .filter-bar #countrySelect { grid-column:2 / 3; }
+      .filter-bar #minPrice { grid-column:1 / 2; }
+      .filter-bar #maxPrice { grid-column:2 / 3; }
       /* Hide clutter on mobile */
       .view-badge { display:none; }
       .stock-badge { display:none; }
@@ -421,10 +427,10 @@
   <div class="filter-sticky" id="searchSticky">
     <div class="filter-bar">
       <select id="sortSelect" onchange="doSearch()">
-        <option value="price_asc" selected>Price: Low to High</option>
+        <option value="price_asc" selected>Lowest Price</option>
         <option value="relevance">Relevance</option>
-        <option value="price_desc">Price: High to Low</option>
-        <option value="rating">Highest Rated</option>
+        <option value="price_desc">Highest Price</option>
+        <option value="rating">Top Rated</option>
       </select>
       <input type="number" id="minPrice" placeholder="Min" onchange="doSearch()">
       <input type="number" id="maxPrice" placeholder="Max" onchange="doSearch()">
@@ -446,7 +452,7 @@
     </div>
   </div>
 
-  <div class="main-content" style="padding-top:130px">
+  <div class="main-content">
     <div class="hero" id="heroSection">
       <h1>Find the Cheapest Price Everywhere</h1>
       <p>Compare prices across 40+ global platforms instantly</p>
