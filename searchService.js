@@ -202,6 +202,16 @@ async function searchGoogleShopping(query, countryConfig, options, limit) {
         }
       }
 
+      // Map Shein domains to correct regional domain
+      var sheinDomainMap = {
+        'uk': 'shein.co.uk', 'de': 'shein.de', 'fr': 'shein.fr',
+        'us': 'shein.com', 'ca': 'shein.com', 'au': 'shein.com.au',
+        'it': 'shein.it', 'es': 'shein.es', 'nl': 'shein.nl',
+        'se': 'shein.se', 'pl': 'shein.pl', 'jp': 'shein.co.jp',
+        'mx': 'shein.com.mx', 'br': 'shein.com.br', 'ae': 'shein.ae',
+        'sa': 'shein.sa', 'sg': 'shein.com.sg', 'tr': 'shein.com.tr'
+      };
+
       // If Google gives us a redirect URL (not a direct merchant link),
       // try to build a direct merchant link for known partners
       if (isGoogleUrl || url === '#' || !url.startsWith('http')) {
@@ -224,6 +234,10 @@ async function searchGoogleShopping(query, countryConfig, options, limit) {
           // Note: /sch/ search pages intentionally skip campid (breaks eBay).
           var ebayDomain = ebayDomainMap[countryConfig.gl] || 'ebay.com';
           url = 'https://www.' + ebayDomain + '/sch/i.html?_nkw=' + searchQuery;
+        } else if (detectedSource.includes('shein')) {
+          // Direct Shein search with Awin affiliate tag
+          var sheinDomain = sheinDomainMap[countryConfig.gl] || 'shein.com';
+          url = 'https://www.' + sheinDomain + '/search?q=' + searchQuery;
         } else if (rawUrl && rawUrl.startsWith('http')) {
           // Unknown source but we have a Google redirect URL — keep it!
           // It will redirect to the merchant. Don't send users to Google search.
