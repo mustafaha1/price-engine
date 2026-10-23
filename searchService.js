@@ -311,7 +311,7 @@ async function getEbayOAuthToken() {
       'Content-Type': 'application/x-www-form-urlencoded',
       'Authorization': 'Basic ' + credentials
     },
-    body: 'grant_type=client_credentials&scope=https://api.ebay.com/oauth/api_scope/buy.item.feed'
+    body: 'grant_type=client_credentials&scope=https://api.ebay.com/oauth/api_scope'
   });
 
   if (!response.ok) {
@@ -345,11 +345,12 @@ async function searchEbay(query, countryConfig, options, limit) {
       'q=' + encodeURIComponent(query) +
       '&limit=' + entriesPerPage;
 
-    if (options.minPrice !== undefined) {
-      url += '&filter=price:[..' + options.minPrice + ']';
-    }
-    if (options.maxPrice !== undefined) {
-      url += '&filter=price:[' + (options.minPrice || '0') + '..' + options.maxPrice + ']';
+    if (options.minPrice !== undefined && options.maxPrice !== undefined) {
+      url += '&filter=price:[' + options.minPrice + '..' + options.maxPrice + ']';
+    } else if (options.minPrice !== undefined) {
+      url += '&filter=price:[' + options.minPrice + '..' + ']';
+    } else if (options.maxPrice !== undefined) {
+      url += '&filter=price:[..' + options.maxPrice + ']';
     }
 
     var response = await fetch(url, {
