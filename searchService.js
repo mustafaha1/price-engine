@@ -218,10 +218,12 @@ async function searchGoogleShopping(query, countryConfig, options, limit) {
         } else if (detectedSource.includes('target')) {
           url = 'https://www.target.com/s?searchTerm=' + searchQuery;
         } else if (detectedSource.includes('ebay')) {
-          // eBay API provides real item pages (/itm/) with campid tracking.
-          // Google Shopping knowledge panels for eBay create broken search pages.
-          // Skip Google Shopping eBay results — let eBay API handle eBay listings.
-          return null;
+          // TEMPORARY: eBay Finding API is dead (418 error).
+          // eBay Browse API requires Developer Program approval (pending review).
+          // Using Google Shopping eBay search pages as fallback.
+          // Note: /sch/ search pages intentionally skip campid (breaks eBay).
+          var ebayDomain = ebayDomainMap[countryConfig.gl] || 'ebay.com';
+          url = 'https://www.' + ebayDomain + '/sch/i.html?_nkw=' + searchQuery;
         } else if (rawUrl && rawUrl.startsWith('http')) {
           // Unknown source but we have a Google redirect URL — keep it!
           // It will redirect to the merchant. Don't send users to Google search.
