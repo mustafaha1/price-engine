@@ -1,25 +1,25 @@
 const AFFILIATE_PROGRAMS = {
   // Amazon domains — COUNTRY-SPECIFIC tracking IDs
   // US tag for Americas/Asia/default | UK tag for UK | EU tag for EU
-  'amazon.com': { tag: '?tag=priceeengine08-20' },       // US
+  'amazon.com': { tag: '?tag=priceengine08-20' },       // US
   'amazon.co.uk': { tag: '?tag=priceengine21-21' },       // UK
-  'amazon.ca': { tag: '?tag=priceeengine08-20' },         // US (same programme)
+  'amazon.ca': { tag: '?tag=priceengine08-20' },         // US (same programme)
   'amazon.de': { tag: '?tag=priceengine0d-21' },          // EU (Germany)
   'amazon.fr': { tag: '?tag=priceengine0d-21' },          // EU (France)
   'amazon.it': { tag: '?tag=priceengine0d-21' },          // EU (Italy)
   'amazon.es': { tag: '?tag=priceengine0d-21' },          // EU (Spain)
-  'amazon.co.jp': { tag: '?tag=priceeengine08-20' },      // US default
-  'amazon.in': { tag: '?tag=priceeengine08-20' },         // US default
-  'amazon.com.au': { tag: '?tag=priceeengine08-20' },     // US default
-  'amazon.com.br': { tag: '?tag=priceeengine08-20' },     // US default
+  'amazon.co.jp': { tag: '?tag=priceengine08-20' },      // US default
+  'amazon.in': { tag: '?tag=priceengine08-20' },         // US default
+  'amazon.com.au': { tag: '?tag=priceengine08-20' },     // US default
+  'amazon.com.br': { tag: '?tag=priceengine08-20' },     // US default
   'amazon.nl': { tag: '?tag=priceengine0d-21' },          // EU (Netherlands)
   'amazon.se': { tag: '?tag=priceengine0d-21' },          // EU (Sweden)
   'amazon.pl': { tag: '?tag=priceengine0d-21' },          // EU (Poland)
-  'amazon.sg': { tag: '?tag=priceeengine08-20' },         // US default
-  'amazon.ae': { tag: '?tag=priceeengine08-20' },         // US default
-  'amazon.sa': { tag: '?tag=priceeengine08-20' },         // US default
-  'amazon.com.tr': { tag: '?tag=priceeengine08-20' },     // US default
-  'amazon.com.mx': { tag: '?tag=priceeengine08-20' },     // US (same programme)
+  'amazon.sg': { tag: '?tag=priceengine08-20' },         // US default
+  'amazon.ae': { tag: '?tag=priceengine08-20' },         // US default
+  'amazon.sa': { tag: '?tag=priceengine08-20' },         // US default
+  'amazon.com.tr': { tag: '?tag=priceengine08-20' },     // US default
+  'amazon.com.mx': { tag: '?tag=priceengine08-20' },     // US (same programme)
 
   // eBay domains
   'ebay.com': { tag: '?campid=5339220900&mkevt=1&toolid=80005&mkcid=1' },
