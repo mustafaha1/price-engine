@@ -563,7 +563,7 @@
   <script>
     var NO_IMAGE='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2YyZjJmNyIvPjx0ZXh0IHg9IjE1MCIgeT0iMTUwIiBmb250LWZhbWlseT0iQXJpYWwsc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzhlOGU5MyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
 
-    function getRedirectUrl(url){ if(!url||url==='#')return'#'; try{ var u=new URL(url); if(u.hostname.includes('ebay.')){ return'/go.html?url='+encodeURIComponent(url); } }catch(e){} return url; }
+    function getRedirectUrl(url){ if(!url||url==='#')return'#'; return url; }
 
     /* ========== LANGUAGE SYSTEM ========== */
     var LANG_MAP={'DE':'de','AT':'de','CH':'de','LU':'de','LI':'de','FR':'fr','BE':'fr','MC':'fr','ES':'es','AD':'es','NL':'nl','BE_NL':'nl','IT':'it','SM':'it','VA':'it','PT':'pt','BR':'pt','AO':'pt','MZ':'pt','JP':'ja','TR':'tr','PL':'pl','SE':'se'};
