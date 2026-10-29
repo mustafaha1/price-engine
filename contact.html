@@ -102,7 +102,7 @@
     <h2>Send Us a Message</h2>
     <p>Fill out the form below and we'll get back to you as soon as possible.</p>
     
-    <form action="mailto:support@priceengineapp.com" method="post" enctype="text/plain" style="max-width:600px;margin:24px 0">
+    <form id="contactForm" style="max-width:600px;margin:24px 0">
       <div class="form-group">
         <label for="name">Your Name *</label>
         <input type="text" id="name" name="name" required placeholder="John Smith">
@@ -175,11 +175,43 @@
     <p style="font-size:13px;color:#888;margin-bottom:10px">
       PriceEngine participates in affiliate programs. We may earn commissions when you click links and make purchases.
     </p>
-    <p style="font-size:13px;color:#888">&copy; 2024 PriceEngine. All rights reserved.</p>
+    <p style="font-size:13px;color:#888">&copy; 2026 PriceEngine. All rights reserved.</p>
   </footer>
   
   <script>
     if(localStorage.getItem('theme')==='dark')document.documentElement.classList.add('dark');
+
+    document.getElementById('contactForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var name = document.getElementById('name').value.trim();
+      var email = document.getElementById('email').value.trim();
+      var subject = document.getElementById('subject').value;
+      var message = document.getElementById('message').value.trim();
+
+      var subjectLabels = {
+        support: 'Customer Support',
+        feedback: 'Feedback / Suggestion',
+        partnership: 'Partnership / Affiliate Enquiry',
+        advertising: 'Advertising Opportunities',
+        bug: 'Report a Bug',
+        other: 'Other'
+      };
+
+      var toEmail = (subject === 'partnership' || subject === 'advertising') 
+        ? 'partners@priceengineapp.com' 
+        : 'support@priceengineapp.com';
+
+      var mailtoSubject = encodeURIComponent('PriceEngine Contact: ' + subjectLabels[subject]);
+      var mailtoBody = encodeURIComponent(
+        'Name: ' + name + '\n' +
+        'Email: ' + email + '\n' +
+        'Subject: ' + subjectLabels[subject] + '\n' +
+        '----------------------------------------\n' +
+        message
+      );
+
+      window.location.href = 'mailto:' + toEmail + '?subject=' + mailtoSubject + '&body=' + mailtoBody;
+    });
   </script>
 </body>
 </html>
