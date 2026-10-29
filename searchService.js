@@ -241,20 +241,17 @@ async function searchGoogleShopping(query, countryConfig, options, limit) {
         } else if (detectedSource.includes('target')) {
           url = 'https://www.target.com/s?searchTerm=' + searchQuery;
         } else if (detectedSource.includes('ebay')) {
-          // eBay: keep actual product URL — never use search pages (/sch/ strips campid)
-          // Google redirect URLs already have eBay affiliate tracking via Google's partnership
-          // Direct eBay URLs get our campid added if missing
+          // eBay: prefer direct product URL, fallback to eBay search — NEVER keep Google URLs
           if (url && url.includes('ebay.') && url.startsWith('http') && !url.includes('google.com')) {
             // Direct eBay product URL — add our campid if not present
             if (!url.includes('campid=')) {
               url += (url.includes('?') ? '&' : '?') + 'campid=5339220900&mkevt=1&toolid=80005&mkcid=1';
             }
-          } else if (rawUrl && rawUrl.startsWith('http')) {
-            // Google redirect URL — keep it, Google handles eBay affiliate tracking
-            url = rawUrl;
           } else {
-            // No usable eBay URL — skip this product
-            return null;
+            // No direct eBay URL — build eBay search link so users go to eBay directly
+            // (not Google Shopping). Campid is added by affiliateService.js.
+            var ebayDomain = ebayDomainMap[countryConfig.gl] || 'ebay.com';
+            url = 'https://www.' + ebayDomain + '/sch/i.html?_nkw=' + searchQuery;
           }
         } else if (detectedSource.includes('shein')) {
           // Direct Shein search with Awin affiliate tag

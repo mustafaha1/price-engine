@@ -239,9 +239,11 @@ function addAffiliateLink(product) {
   // Try matching by merchant name (source field) first — this is the primary method
   // because SerpAPI returns Google Shopping redirect URLs, not direct merchant URLs
   let affiliate = null;
+  let matchedBySource = false;
 
   if (product.source) {
     affiliate = getAffiliateBySource(product.source);
+    if (affiliate) matchedBySource = true;
   }
 
   // Fallback: try matching by URL domain (for direct merchant links)
@@ -252,6 +254,16 @@ function addAffiliateLink(product) {
   if (affiliate) {
     product.original_url = product.product_url;
     const url = product.product_url;
+
+    // If we matched by source name, verify the URL actually belongs to that merchant.
+    // SerpAPI sometimes returns Google Shopping redirect URLs with merchant source names.
+    // Don't add eBay campid to Google Shopping URLs!
+    if (matchedBySource) {
+      const urlAffiliate = getAffiliateByUrl(url);
+      if (!urlAffiliate || urlAffiliate.name !== affiliate.name) {
+        return product; // URL doesn't match the claimed merchant — skip
+      }
+    }
 
     // eBay search pages (/sch/) BREAK when campid is added — skip them
     const isEbaySearchPage = url.includes('ebay.') && url.includes('/sch/');
