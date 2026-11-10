@@ -90,7 +90,7 @@ app.get('/out', (req, res) => {
     if (decoded.includes('amazon.com') || decoded.includes('amazon.')) {
       var separator = decoded.includes('?') ? '&' : '?';
       if (!decoded.includes('tag=')) {
-        decoded += separator + 'tag=priceeengine08-20';
+        decoded += separator + 'tag=priceengine08-20';
       }
     }
     // Add eBay affiliate tag if it's an eBay ITEM link (not search page)
