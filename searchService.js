@@ -146,6 +146,30 @@ async function search(query, options) {
   }
 }
 
+// An eBay result must link to an individual listing, never a search page.
+function isDirectEbayItemUrl(value) {
+  try {
+    const parsed = new URL(value);
+    const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
+    return ['http:', 'https:'].includes(parsed.protocol) &&
+      (host === 'ebay.com' || host.startsWith('ebay.')) &&
+      /^\/itm\/(?:[^/?#]+\/)?\d+\/?$/i.test(parsed.pathname);
+  } catch (e) {
+    return false;
+  }
+}
+
+// Require a genuine Amazon product ASIN URL, not an Amazon search page.
+function isDirectAmazonProductUrl(value) {
+  try {
+    const parsed = new URL(value);
+    const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
+    return ['http:', 'https:'].includes(parsed.protocol) &&
+      (host === 'amazon.com' || host.startsWith('amazon.')) &&
+      /\/(?:dp|gp\/product)\/[A-Z0-9]{10}(?:[/?#]|$)/i.test(parsed.pathname);
+  } catch (e) { return false; }
+}
+
 async function searchGoogleShopping(query, countryConfig, options, limit) {
   var params = {
     engine: 'google_shopping',
@@ -267,6 +291,15 @@ async function searchGoogleShopping(query, countryConfig, options, limit) {
           return null;
         }
       }
+
+      // Skip eBay offers without a real, direct item URL.
+      // Do not substitute a /sch/ search page for a product listing.
+      // Only advertise Amazon/eBay products when a specific listing is known.
+      // Missing product URLs cannot safely be reconstructed from a title.
+      if ((detectedSource.includes('ebay') || /https?:\/\/(?:www\.)?ebay\./i.test(url)) &&
+          !isDirectEbayItemUrl(url)) return null;
+      if ((detectedSource.includes('amazon') || /https?:\/\/(?:www\.)?amazon\./i.test(url)) &&
+          !isDirectAmazonProductUrl(url)) return null;
 
       var thumbnail = item.thumbnail || item.image || null;
       var images = [thumbnail];
@@ -398,6 +431,7 @@ async function searchEbay(query, countryConfig, options, limit) {
       var currency = item.price ? item.price.currency : 'USD';
       var image = item.image ? item.image.imageUrl : null;
       var itemUrl = item.itemWebUrl || '#';
+      if (!isDirectEbayItemUrl(itemUrl)) return null;
       var condition = item.condition || '';
       var seller = item.seller && item.seller.username ? item.seller.username : 'eBay Seller';
       var topRated = item.topRatedBuyingExperience || false;
@@ -419,7 +453,7 @@ async function searchEbay(query, countryConfig, options, limit) {
       };
 
       return affiliateService.addAffiliateLink(product);
-    }).filter(item => item.price > 0 || !item.price);
+    }).filter(item => item && (item.price > 0 || !item.price));
 
   } catch (error) {
     console.error('eBay search error:', error.message);
@@ -637,7 +671,7 @@ function extractDomain(url) {
 }
 
 function generateDemoResults(query, options) {
-  var sources = ['Amazon', 'eBay', 'Walmart', 'Best Buy', 'Target', 'AliExpress'];
+  var sources = ['Amazon', 'Walmart', 'Best Buy', 'Target', 'AliExpress'];
   var results = [];
   var count = Math.min(options.limit || 10, 20);
 
