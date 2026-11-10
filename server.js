@@ -80,40 +80,47 @@ app.use('/api/upload', require('./upload'));
 
 // Redirect endpoint for shared links — ensures shared product URLs always work
 app.get('/out', (req, res) => {
-  var targetUrl = req.query.url;
-  if (!targetUrl) {
+  const targetUrl = req.query.url;
+  if (typeof targetUrl !== 'string' || !targetUrl || targetUrl.length > 8192) {
     return res.redirect('/');
   }
   try {
-    var decoded = decodeURIComponent(targetUrl);
-    // Add Amazon affiliate tag if it's an Amazon link without one
-    if (decoded.includes('amazon.com') || decoded.includes('amazon.')) {
-      var separator = decoded.includes('?') ? '&' : '?';
-      if (!decoded.includes('tag=')) {
-        decoded += separator + 'tag=priceengine08-20';
-      }
+    // Express has already decoded the query parameter. Avoid decoding twice.
+    const destination = new URL(targetUrl);
+    if (!['https:', 'http:'].includes(destination.protocol) ||
+        destination.username || destination.password) {
+      return res.redirect('/');
     }
-    // Add eBay affiliate tag if it's an eBay ITEM link (not search page)
-    // campid only works on /itm/ pages, causes kick-out on /sch/ search pages
-    if ((decoded.includes('ebay.com') || decoded.includes('ebay.')) && decoded.includes('/itm/')) {
-      var sep = decoded.includes('?') ? '&' : '?';
-      if (!decoded.includes('campid=')) {
-        decoded += sep + 'campid=5339220900&mkevt=1&toolid=80005&mkcid=1';
-      }
+    const hostname = destination.hostname.toLowerCase().replace(/^www\./, '');
+    // Preserve existing Amazon fallback behaviour, without matching fake hosts.
+    if ((hostname === 'amazon.com' || hostname.startsWith('amazon.')) &&
+        !destination.searchParams.has('tag')) {
+      destination.searchParams.set('tag', 'priceengine08-20');
     }
-    // Return HTML page with PriceEngine title + JS replace()
-    // window.location.replace() removes this /out page from browser history
-    // So when user taps BACK from the store, they go straight to PriceEngine
+    let finalUrl = destination.toString();
+    // Use the central affiliate service for genuine eBay URLs only.
+    // UK/DE item and search links use EPN-verified marketplace parameters.
+    if (hostname === 'ebay.com' || hostname.startsWith('ebay.')) {
+      finalUrl = require('./affiliateService').addAffiliateLink({
+        source: 'eBay', product_url: finalUrl
+      }).product_url;
+    }
+    // JSON string literal + HTML-safe escaping prevents script injection.
+    const safeUrl = JSON.stringify(finalUrl)
+      .replace(/</g, '\\u003c').replace(/>/g, '\\u003e')
+      .replace(/&/g, '\\u0026')
+      .replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
+    res.set('Cache-Control', 'no-store');
     res.send('<!DOCTYPE html><html><head><title>PriceEngine</title><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
       '<style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;text-align:center;padding:60px 20px;color:#333;background:#fff}' +
       '.logo{font-size:22px;font-weight:800;color:#1B1F3B;margin-bottom:12px;letter-spacing:-0.3px}' +
       '.msg{color:#888;font-size:14px}</style></head><body>' +
       '<div class="logo">PriceEngine</div>' +
       '<div class="msg">Redirecting to store...</div>' +
-      '<script>window.location.replace("' + decoded.replace(/"/g, '&quot;') + '");</script>' +
+      '<script>window.location.replace(' + safeUrl + ');</script>' +
       '</body></html>');
   } catch (e) {
-    res.redirect('/');
+    return res.redirect('/');
   }
 });
 

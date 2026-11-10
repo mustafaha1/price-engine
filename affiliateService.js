@@ -21,24 +21,25 @@ const AFFILIATE_PROGRAMS = {
   'amazon.com.tr': { tag: '?tag=priceengine08-20' },     // US default
   'amazon.com.mx': { tag: '?tag=priceengine08-20' },     // US (same programme)
 
-  // eBay domains
-  'ebay.com': { tag: '?campid=5339220900&mkevt=1&toolid=80005&mkcid=1' },
-  'ebay.co.uk': { tag: '?campid=5339220900&mkevt=1&toolid=80005&mkcid=1' },
-  'ebay.de': { tag: '?campid=5339220900&mkevt=1&toolid=80005&mkcid=1' },
-  'ebay.fr': { tag: '?campid=5339220900&mkevt=1&toolid=80005&mkcid=1' },
-  'ebay.it': { tag: '?campid=5339220900&mkevt=1&toolid=80005&mkcid=1' },
-  'ebay.es': { tag: '?campid=5339220900&mkevt=1&toolid=80005&mkcid=1' },
-  'ebay.com.au': { tag: '?campid=5339220900&mkevt=1&toolid=80005&mkcid=1' },
-  'ebay.ca': { tag: '?campid=5339220900&mkevt=1&toolid=80005&mkcid=1' },
-  'ebay.nl': { tag: '?campid=5339220900&mkevt=1&toolid=80005&mkcid=1' },
-  'ebay.at': { tag: '?campid=5339220900&mkevt=1&toolid=80005&mkcid=1' },
-  'ebay.be': { tag: '?campid=5339220900&mkevt=1&toolid=80005&mkcid=1' },
-  'ebay.ch': { tag: '?campid=5339220900&mkevt=1&toolid=80005&mkcid=1' },
-  'ebay.ie': { tag: '?campid=5339220900&mkevt=1&toolid=80005&mkcid=1' },
-  'ebay.pl': { tag: '?campid=5339220900&mkevt=1&toolid=80005&mkcid=1' },
-  'ebay.com.br': { tag: '?campid=5339220900&mkevt=1&toolid=80005&mkcid=1' },
-  'ebay.in': { tag: '?campid=5339220900&mkevt=1&toolid=80005&mkcid=1' },
-  'ebay.co.jp': { tag: '?campid=5339220900&mkevt=1&toolid=80005&mkcid=1' },
+  // eBay domains — now include mkrid (marketplace referrer) and siteid for proper tracking
+  // mkrid and siteid are REQUIRED for eBay Partner Network to attribute clicks correctly
+  'ebay.com':    { tag: '?campid=5339220900&mkevt=1&toolid=10001&mkcid=1&mkrid=711-53200-19255-0&siteid=0' },   // US
+  'ebay.co.uk':  { tag: '?campid=5339220900&mkevt=1&toolid=10001&mkcid=1&mkrid=710-53481-19255-0&siteid=3' },   // UK
+  'ebay.de':     { tag: '?campid=5339220900&mkevt=1&toolid=10001&mkcid=1&mkrid=707-53477-19255-0&siteid=77' },  // DE
+  'ebay.fr':     { tag: '?campid=5339220900&mkevt=1&toolid=10001&mkcid=1&mkrid=709-53476-19255-0&siteid=71' },   // FR
+  'ebay.it':     { tag: '?campid=5339220900&mkevt=1&toolid=10001&mkcid=1&mkrid=724-53480-19255-0&siteid=101' }, // IT
+  'ebay.es':     { tag: '?campid=5339220900&mkevt=1&toolid=10001&mkcid=1&mkrid=1185-53479-19255-0&siteid=186' },// ES
+  'ebay.com.au': { tag: '?campid=5339220900&mkevt=1&toolid=10001&mkcid=1&mkrid=705-53470-19255-0&siteid=15' },  // AU
+  'ebay.ca':     { tag: '?campid=5339220900&mkevt=1&toolid=10001&mkcid=1&mkrid=706-53473-19255-0&siteid=2' },   // CA
+  'ebay.nl':     { tag: '?campid=5339220900&mkevt=1&toolid=10001&mkcid=1&mkrid=1349-53478-19255-0&siteid=146' },// NL
+  'ebay.at':     { tag: '?campid=5339220900&mkevt=1&toolid=10001&mkcid=1&mkrid=707-53477-19255-0&siteid=77' },  // AT → DE marketplace
+  'ebay.be':     { tag: '?campid=5339220900&mkevt=1&toolid=10001&mkcid=1&mkrid=710-53481-19255-0&siteid=3' },   // BE → UK marketplace
+  'ebay.ch':     { tag: '?campid=5339220900&mkevt=1&toolid=10001&mkcid=1&mkrid=707-53477-19255-0&siteid=77' },  // CH → DE marketplace
+  'ebay.ie':     { tag: '?campid=5339220900&mkevt=1&toolid=10001&mkcid=1&mkrid=710-53481-19255-0&siteid=3' },   // IE → UK marketplace
+  'ebay.pl':     { tag: '?campid=5339220900&mkevt=1&toolid=10001&mkcid=1' },                                      // PL
+  'ebay.com.br': { tag: '?campid=5339220900&mkevt=1&toolid=10001&mkcid=1' },                                      // BR
+  'ebay.in':     { tag: '?campid=5339220900&mkevt=1&toolid=10001&mkcid=1' },                                      // IN
+  'ebay.co.jp':  { tag: '?campid=5339220900&mkevt=1&toolid=10001&mkcid=1' },                                      // JP
 
   // Walmart domains
   'walmart.com': { tag: '?affp1=priceengine' },
@@ -235,6 +236,33 @@ function getAffiliateByUrl(urlString) {
 
 function addAffiliateLink(product) {
   if (!product || !product.product_url) return product;
+
+  // eBay-only fix: canonicalise tracking on genuine eBay item URLs.
+  // Leave Amazon and every other retailer's original behaviour unchanged.
+  try {
+    const parsed = new URL(product.product_url);
+    const hostname = parsed.hostname.toLowerCase().replace(/^www\./, '');
+    const isEbay = hostname === 'ebay.com' || hostname.startsWith('ebay.');
+    if (isEbay && (parsed.protocol === 'https:' || parsed.protocol === 'http:')) {
+      if (!/^\/(?:itm|sch)\//i.test(parsed.pathname)) return product;
+      // Only UK/DE search-page tracking has been confirmed against generated EPN links.
+      if (/^\/sch\//i.test(parsed.pathname) && !['ebay.co.uk', 'ebay.de'].includes(hostname)) return product;
+      const config = AFFILIATE_PROGRAMS[hostname];
+      if (!config) return product;
+      const originalUrl = product.product_url;
+      const configured = new URLSearchParams(config.tag.replace(/^\?/, ''));
+      for (const [key, value] of configured) {
+        parsed.searchParams.delete(key);
+        parsed.searchParams.set(key, value);
+      }
+      product.original_url = originalUrl;
+      product.product_url = parsed.toString();
+      return product;
+    }
+    // Do not append eBay tracking to non-eBay destinations labelled as eBay.
+    if (product.source && /ebay/i.test(product.source)) return product;
+  } catch (e) { return product; }
+
 
   // Try matching by merchant name (source field) first — this is the primary method
   // because SerpAPI returns Google Shopping redirect URLs, not direct merchant URLs
