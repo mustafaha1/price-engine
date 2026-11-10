@@ -298,8 +298,7 @@ async function searchGoogleShopping(query, countryConfig, options, limit) {
       // Missing product URLs cannot safely be reconstructed from a title.
       if ((detectedSource.includes('ebay') || /https?:\/\/(?:www\.)?ebay\./i.test(url)) &&
           !isDirectEbayItemUrl(url)) return null;
-      if ((detectedSource.includes('amazon') || /https?:\/\/(?:www\.)?amazon\./i.test(url)) &&
-          !isDirectAmazonProductUrl(url)) return null;
+      
 
       var thumbnail = item.thumbnail || item.image || null;
       var images = [thumbnail];
