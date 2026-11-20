@@ -48,12 +48,9 @@
   <meta name="application-name" content="PriceEngine">
   <meta name="msapplication-TileColor" content="#1B1F3B">
   <meta name="msapplication-TileImage" content="/icon-192.png">
-  <meta name="google-adsense-account" content="ca-pub-5117941503613772">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5117941503613772"
-     crossorigin="anonymous"></script>
-  <style>
+<style>
     :root { --bg:#f3f3f7; --card:#fff; --text:#1c1c1e; --muted:#6b7280; --green:#22c55e; --green-dark:#16a34a; --border:#e5e5ea; --save-bg:#dcfce7; --save-text:#16a34a; --fire:#ff9500; --nav-bg:#131921; --nav-light:#232f3e; }
     .dark { --bg:#0c0c0e; --card:#1c1c1e; --text:#f2f2f7; --muted:#8e8e93; --green:#30d158; --green-dark:#22c55e; --border:#2c2c2e; --save-bg:#164023; --save-text:#30d158; --fire:#ff9f0a; --nav-bg:#0a0e17; --nav-light:#1a1f2e; }
     * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
@@ -373,6 +370,26 @@
       .compare-table td img { width:50px; height:50px; }
     }
   </style>
+  <!-- PriceEngine Google tags: consent defaults precede Google scripts -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('consent', 'default', {
+      analytics_storage: 'denied',
+      ad_storage: 'denied',
+      ad_user_data: 'denied',
+      ad_personalization: 'denied',
+      wait_for_update: 500
+    });
+    gtag('js', new Date());
+    gtag('config', 'G-9B0J80HCXX');
+    // Staging safeguard: do not infer Analytics consent from TCF purpose/vendor IDs.
+    // Keep consent denied until a validated CMP-to-Consent-Mode integration is added.
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-9B0J80HCXX"></script>
+  <meta name="google-adsense-account" content="ca-pub-5117941503613772">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5117941503613772" crossorigin="anonymous"></script>
+  <!-- End PriceEngine Google tags -->
 </head>
 <body>
   <!-- Amazon-style Navbar -->
