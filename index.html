@@ -793,7 +793,7 @@
       var f=getGuestFavs();
       if(f.length===0){ alert(t('noFavs')); return; }
       allSearchResults=f; currentSearchQuery='My Favorites'; activeStoreFilter=null; visibleCount=ITEMS_PER_PAGE;
-      document.getElementById('heroSection').style.display='none'; document.querySelector('.stats-grid').style.display='none';
+      document.getElementById('heroSection').style.display='none'; document.querySelector('.stats-grid')?.style.setProperty('display','none');
       document.getElementById('categoriesSection').style.display='none';
       renderVisible(); initGalleries(); fetchAndShowViews();
     }
@@ -854,7 +854,7 @@
         .catch(function(err){console.error('Upload failed:',err);});
     }
     function searchByImage(imageUrl){
-      document.getElementById('heroSection').style.display='none'; document.querySelector('.stats-grid').style.display='none'; document.getElementById('categoriesSection').style.display='none'; document.getElementById('searchInput').value='Analyzing photo...';
+      document.getElementById('heroSection').style.display='none'; document.querySelector('.stats-grid')?.style.setProperty('display','none'); document.getElementById('categoriesSection').style.display='none'; document.getElementById('searchInput').value='Analyzing photo...';
       var rd=document.getElementById('results'); rd.innerHTML='<div class="loading"><i class="fas fa-camera fa-2x" style="color:var(--green)"></i><p style="margin-top:15px;font-weight:600">Analyzing your photo...</p><p style="font-size:.85rem;color:var(--muted);margin-top:6px">Identifying the product with Google Lens</p></div>'; document.getElementById('stats').innerHTML='';
       var sort=document.getElementById('sortSelect').value, country=document.getElementById('countrySelect').value;
       fetch('/api/search/by-image?imageUrl='+encodeURIComponent(imageUrl)+'&sort='+sort+'&country='+country+'&limit=60')
@@ -867,7 +867,7 @@
     /* ========== SEARCH ========== */
     function doSearch(){
       var q=document.getElementById('searchInput').value.trim(); if(!q)return;
-      document.getElementById('heroSection').style.display='none'; document.querySelector('.stats-grid').style.display='none';
+      document.getElementById('heroSection').style.display='none'; document.querySelector('.stats-grid')?.style.setProperty('display','none');
       var sort=document.getElementById('sortSelect').value, minP=document.getElementById('minPrice').value, maxP=document.getElementById('maxPrice').value, country=document.getElementById('countrySelect').value;
       var rd=document.getElementById('results'); rd.innerHTML='<div class="loading"><i class="fas fa-spinner fa-spin fa-2x"></i><p style="margin-top:15px">Searching...</p></div>'; document.getElementById('stats').innerHTML='';
       var url='/api/search?q='+encodeURIComponent(q)+'&sort='+sort+'&country='+country+'&limit=60'; if(minP)url+='&minPrice='+minP; if(maxP)url+='&maxPrice='+maxP;
