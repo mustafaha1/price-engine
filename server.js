@@ -35,7 +35,7 @@ app.use(helmet({
       fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
       scriptSrc: ["'self'", "'unsafe-inline'", "https://pagead2.googlesyndication.com", "https://partner.googleadservices.com", "https://tpc.googlesyndication.com", "https://www.googletagservices.com", "https://www.googletagmanager.com", "https://fundingchoicesmessages.google.com", "https://*.fundingchoicesmessages.google.com"],
       scriptSrcAttr: ["'unsafe-inline'"],
-      imgSrc: ["'self'", "https:", "data:", "blob:", "/uploads", "https://pagead2.googlesyndication.com"],
+      imgSrc: ["'self'", "https:", "data:", "blob:", "https://pagead2.googlesyndication.com"],
       connectSrc: ["'self'", "https://pagead2.googlesyndication.com", "https://www.google-analytics.com", "https://*.google-analytics.com", "https://www.googletagmanager.com", "https://fundingchoicesmessages.google.com", "https://*.fundingchoicesmessages.google.com"],
       frameSrc: ["'self'", "https://googleads.g.doubleclick.net", "https://tpc.googlesyndication.com", "https://fundingchoicesmessages.google.com", "https://*.fundingchoicesmessages.google.com"],
       frameAncestors: ["'none'"],
