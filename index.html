@@ -363,7 +363,8 @@
       .main-content { padding-top:0; }
       .hero { padding:20px 16px; }
       .hero h1 { font-size:1.15rem; }
-      .logo { font-size:1.1rem; }
+      /* Keep logo text hidden on narrow phones so the search bar fits. */
+      .logo { font-size:0; gap:0; }
       .logo i { font-size:1.2rem; }
       .gallery-arrow { opacity:1; width:28px; height:28px; }
       .compare-table td { padding:6px; font-size:.8rem; }
@@ -467,20 +468,15 @@
 
   <div class="main-content">
     <div class="hero" id="heroSection">
-      <h1 data-i18n="findCheapest">Find the Cheapest Price Everywhere</h1>
-      <p data-i18n="compareAcross">Compare prices across 40+ global platforms instantly</p>
+      <h1 data-i18n="findCheapest">Compare Prices Across Retailers</h1>
+      <p data-i18n="compareAcross">Search products and compare available retailer offers in one place. Confirm prices and details with the seller before buying.</p>
       <div class="hero-search" id="heroSearch" style="display:none">
         <input type="text" placeholder="Search products..." data-i18n-placeholder="searchPlaceholder" onkeydown="if(event.key==='Enter')doSearch()">
         <button onclick="doSearch()"><i class="fas fa-search"></i></button>
       </div>
     </div>
 
-    <div class="stats-grid" id="statsGrid">
-      <div class="stat-card"><i class="fas fa-store"></i><div class="stat-num">40+</div><div class="stat-label" data-i18n="platforms">Platforms</div></div>
-      <div class="stat-card"><i class="fas fa-dollar-sign"></i><div class="stat-num">99%</div><div class="stat-label" data-i18n="accuracy">Accuracy</div></div>
-      <div class="stat-card"><i class="fas fa-bolt"></i><div class="stat-num">Live</div><div class="stat-label" data-i18n="updates">Updates</div></div>
-      <div class="stat-card"><i class="fas fa-globe"></i><div class="stat-num">12</div><div class="stat-label" data-i18n="countries">Countries</div></div>
-    </div>
+
 
     <!-- Recently Viewed -->
     <div class="rv-section" id="rvSection" style="display:none">
@@ -582,8 +578,8 @@
         todaysDeals:"Today's Deals",electronics:"Electronics",fashion:"Fashion",home:"Home & Garden",
         beauty:"Beauty",sports:"Sports",toys:"Toys",all:"All",menu:"Menu",homeNav:"Home",
         myFavorites:"My Favorites",hotDeals:"Hot Deals",login:"Login",register:"Register",
-        favs:"Favs",findCheapest:"Find the Cheapest Price Everywhere",
-        compareAcross:"Compare prices across 40+ global platforms instantly",
+        favs:"Favs",findCheapest:"Compare Prices Across Retailers",
+        compareAcross:"Search products and compare available retailer offers in one place. Confirm prices and details with the seller before buying.",
         searchPlaceholder:"Search products...",lowestPrice:"Lowest Price",relevance:"Relevance",
         highestPrice:"Highest Price",topRated:"Top Rated",minPrice:"Min",maxPrice:"Max",
         pressSearch:"Press Search to find similar products",remove:"Remove",setAlert:"Set Alert",
@@ -797,7 +793,7 @@
       var f=getGuestFavs();
       if(f.length===0){ alert(t('noFavs')); return; }
       allSearchResults=f; currentSearchQuery='My Favorites'; activeStoreFilter=null; visibleCount=ITEMS_PER_PAGE;
-      document.getElementById('heroSection').style.display='none'; document.querySelector('.stats-grid').style.display='none';
+      document.getElementById('heroSection').style.display='none'; document.querySelector('.stats-grid')?.style.setProperty('display','none');
       document.getElementById('categoriesSection').style.display='none';
       renderVisible(); initGalleries(); fetchAndShowViews();
     }
@@ -858,7 +854,7 @@
         .catch(function(err){console.error('Upload failed:',err);});
     }
     function searchByImage(imageUrl){
-      document.getElementById('heroSection').style.display='none'; document.querySelector('.stats-grid').style.display='none'; document.getElementById('categoriesSection').style.display='none'; document.getElementById('searchInput').value='Analyzing photo...';
+      document.getElementById('heroSection').style.display='none'; document.querySelector('.stats-grid')?.style.setProperty('display','none'); document.getElementById('categoriesSection').style.display='none'; document.getElementById('searchInput').value='Analyzing photo...';
       var rd=document.getElementById('results'); rd.innerHTML='<div class="loading"><i class="fas fa-camera fa-2x" style="color:var(--green)"></i><p style="margin-top:15px;font-weight:600">Analyzing your photo...</p><p style="font-size:.85rem;color:var(--muted);margin-top:6px">Identifying the product with Google Lens</p></div>'; document.getElementById('stats').innerHTML='';
       var sort=document.getElementById('sortSelect').value, country=document.getElementById('countrySelect').value;
       fetch('/api/search/by-image?imageUrl='+encodeURIComponent(imageUrl)+'&sort='+sort+'&country='+country+'&limit=60')
@@ -871,7 +867,7 @@
     /* ========== SEARCH ========== */
     function doSearch(){
       var q=document.getElementById('searchInput').value.trim(); if(!q)return;
-      document.getElementById('heroSection').style.display='none'; document.querySelector('.stats-grid').style.display='none';
+      document.getElementById('heroSection').style.display='none'; document.querySelector('.stats-grid')?.style.setProperty('display','none');
       var sort=document.getElementById('sortSelect').value, minP=document.getElementById('minPrice').value, maxP=document.getElementById('maxPrice').value, country=document.getElementById('countrySelect').value;
       var rd=document.getElementById('results'); rd.innerHTML='<div class="loading"><i class="fas fa-spinner fa-spin fa-2x"></i><p style="margin-top:15px">Searching...</p></div>'; document.getElementById('stats').innerHTML='';
       var url='/api/search?q='+encodeURIComponent(q)+'&sort='+sort+'&country='+country+'&limit=60'; if(minP)url+='&minPrice='+minP; if(maxP)url+='&maxPrice='+maxP;
