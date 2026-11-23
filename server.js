@@ -6,6 +6,7 @@ require('dotenv').config();
 
 const rateLimit = require('express-rate-limit');
 const { initDatabase } = require('./database');
+const analytics = require('./privateAnalytics');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -66,6 +67,12 @@ function sanitizeObject(obj) {
 
 app.use(sanitizeInput);
 
+// Private dashboard routes MUST precede public static serving.
+app.use('/private-analytics', analytics.dashboardRouter);
+// Never expose the dashboard HTML directly through the public static directory.
+app.use(['/private-analytics-dashboard.html', '/privateAnalytics.js'],
+  (req, res) => res.sendStatus(404));
+app.get('/', (req, res, next) => { analytics.count('page_view'); next(); });
 app.use(express.static(__dirname));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -110,6 +117,7 @@ app.get('/out', (req, res) => {
       .replace(/</g, '\\u003c').replace(/>/g, '\\u003e')
       .replace(/&/g, '\\u0026')
       .replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
+    analytics.count('store_click', hostname);
     res.set('Cache-Control', 'no-store');
     res.send('<!DOCTYPE html><html><head><title>PriceEngine</title><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
       '<style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;text-align:center;padding:60px 20px;color:#333;background:#fff}' +
@@ -130,6 +138,7 @@ app.use((err, req, res, next) => {
 });
 
 initDatabase()
+  .then(() => analytics.initAnalytics())
   .then(() => {
     app.listen(PORT, () => {
       console.log('Server running on port ' + PORT);

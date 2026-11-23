@@ -3,6 +3,7 @@ const { getDb } = require('./database');
 const { authenticateToken } = require('./auth');
 const searchService = require('./searchService');
 const router = express.Router();
+const analytics = require('./privateAnalytics');
 
 router.get('/', async (req, res) => {
   try {
@@ -35,6 +36,7 @@ router.get('/', async (req, res) => {
       sort: ['relevance', 'price_asc', 'price_desc', 'rating'].includes(sort) ? sort : 'relevance'
     };
 
+    analytics.count('search', q);
     var results = await searchService.search(q, options);
 
     res.json({
