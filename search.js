@@ -135,6 +135,14 @@ router.post('/track-view', async (req, res) => {
         return res.status(500).json({ success: false, message: 'Failed to track view' });
       }
 
+      // Private aggregate click count; never modify or redirect the affiliate URL.
+      try {
+        const target = new URL(productUrl);
+        if (['http:', 'https:'].includes(target.protocol) && target.hostname.length <= 100) {
+          analytics.count('store_click', target.hostname.toLowerCase().replace(/^www\./, ''));
+        }
+      } catch (_) { /* Analytics must not interrupt existing view tracking. */ }
+
       if (row) {
         db.run(
           'UPDATE product_views SET view_count = view_count + 1, last_viewed_at = CURRENT_TIMESTAMP WHERE id = ?',
