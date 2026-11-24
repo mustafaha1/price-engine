@@ -72,6 +72,8 @@ app.use('/private-analytics', analytics.dashboardRouter);
 // Never expose the dashboard HTML directly through the public static directory.
 app.use(['/private-analytics-dashboard.html', '/privateAnalytics.js'],
   (req, res) => res.sendStatus(404));
+app.get('/api/private-visitor/config', (req,res)=>{res.set('Cache-Control','no-store');res.json({enabled:analytics.visitorEnabled()});});
+app.post('/api/private-visitor/event', analytics.visitorEvent);
 app.get('/', (req, res, next) => { analytics.count('page_view'); next(); });
 app.use(express.static(__dirname));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

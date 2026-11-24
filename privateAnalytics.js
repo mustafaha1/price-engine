@@ -42,7 +42,7 @@ function initAnalytics() {
         cleanupError => {
           if (cleanupError) return reject(cleanupError);
           lastCleanupDay = new Date().toISOString().slice(0, 10);
-          resolve();
+          db.run(`CREATE TABLE IF NOT EXISTS private_visitors (day TEXT NOT NULL, visitor TEXT NOT NULL, PRIMARY KEY(day,visitor))`, e => e ? reject(e) : resolve());
         });
     });
   });
@@ -97,7 +97,29 @@ dashboardRouter.get('/data', (req,res)=>{
     WHERE event != 'search_term' OR day >= date('now','-29 days')
     ORDER BY day DESC, count DESC`,[],(err,rows)=>{
       if(err) return res.status(500).json({error:'Unable to read analytics'});
-      res.json({days:30,rows});
+      db.all(`SELECT COUNT(DISTINCT CASE WHEN day=date('now') THEN visitor END) AS today,
+        COUNT(DISTINCT CASE WHEN day>=date('now','-6 days') THEN visitor END) AS week,
+        COUNT(DISTINCT visitor) AS month FROM private_visitors WHERE day>=date('now','-29 days')`,[],(e,v)=>{
+          if(e) return res.status(500).json({error:'Unable to read visitor counts'});
+          res.json({days:30,rows,visitors:v[0],visitorEnabled:visitorEnabled()});
+        });
     });
 });
-module.exports={initAnalytics,count,dashboardRouter};
+// Explicit staging-only opt-in. No visitor identifier without consent.
+const visitorEnabled = () => process.env.PRIVATE_VISITOR_MODE === 'staging-test';
+function visitorEvent(req,res) {
+  res.set('Cache-Control','no-store');
+  if (!visitorEnabled()) return res.sendStatus(404);
+  if (req.get('sec-fetch-site') !== 'same-origin' || !req.is('application/json')) return res.sendStatus(403);
+  const {id, action} = req.body || {};
+  if (typeof id !== 'string' || !/^[a-f0-9]{32}$/.test(id)) return res.sendStatus(400);
+  const db = getDb();
+  const hash = crypto.createHash('sha256').update(id).digest('hex');
+  if (action === 'withdraw') return db.run('DELETE FROM private_visitors WHERE visitor=?',[hash],e=>res.sendStatus(e?500:204));
+  if (action !== 'visit') return res.sendStatus(400);
+  db.run("DELETE FROM private_visitors WHERE day < date('now','-29 days')",e=>{
+    if(e) return res.sendStatus(500);
+    db.run("INSERT OR IGNORE INTO private_visitors(day,visitor) VALUES(date('now'),?)",[hash],e=>res.sendStatus(e?500:204));
+  });
+}
+module.exports={initAnalytics,count,dashboardRouter,visitorEnabled,visitorEvent};
